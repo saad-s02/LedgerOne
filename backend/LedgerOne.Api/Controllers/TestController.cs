@@ -21,4 +21,7 @@ public class TestController(AppDbContext db) : ControllerBase
         await TestSeeder.ClearAsync(db, ct);
         return NoContent();
     }
+
+    [HttpGet("boom")]
+    public IActionResult Boom() => throw new InvalidOperationException("boom for tests");
 }
