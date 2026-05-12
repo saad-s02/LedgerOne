@@ -12,6 +12,9 @@ var mvc = builder.Services.AddControllers().AddJsonOptions(opts =>
     opts.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
 });
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<LedgerOne.Api.Infrastructure.ProblemDetails.GlobalExceptionHandler>();
+
 builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.ListTransactionsHandler>();
 
 builder.Services.AddDbContext<AppDbContext>(opts =>
@@ -21,6 +24,8 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
 });
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
 {
