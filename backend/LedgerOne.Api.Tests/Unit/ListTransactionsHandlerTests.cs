@@ -119,4 +119,36 @@ public class ListTransactionsHandlerTests : IDisposable
         response.Data.Should().BeEmpty();
         response.Page.Should().Be(99);
     }
+
+    [Fact]
+    public async Task Handle_DefaultsToTransactionDateDescending()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction
+            {
+                TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                AccountId = "OLD", AdvisorName = "x", Type = TransactionType.Buy,
+                Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,
+                CreatedAt = DateTime.UtcNow,
+            },
+            new Transaction
+            {
+                TransactionDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
+                AccountId = "NEW", AdvisorName = "x", Type = TransactionType.Buy,
+                Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,
+                CreatedAt = DateTime.UtcNow,
+            },
+            new Transaction
+            {
+                TransactionDate = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc),
+                AccountId = "MID", AdvisorName = "x", Type = TransactionType.Buy,
+                Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,
+                CreatedAt = DateTime.UtcNow,
+            });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(new ListTransactionsRequest(), ct);
+        response.Data.Select(d => d.AccountId).Should().ContainInOrder("NEW", "MID", "OLD");
+    }
 }
