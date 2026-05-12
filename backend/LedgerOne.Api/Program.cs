@@ -6,7 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+var mvc = builder.Services.AddControllers().AddJsonOptions(opts =>
+{
+    opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    opts.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+});
+
+builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.ListTransactionsHandler>();
 
 builder.Services.AddDbContext<AppDbContext>(opts =>
 {
