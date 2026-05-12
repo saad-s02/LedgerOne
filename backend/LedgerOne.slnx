@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LedgerOne.Api.Tests/LedgerOne.Api.Tests.csproj" />
+  <Project Path="LedgerOne.Api/LedgerOne.Api.csproj" />
+</Solution>
