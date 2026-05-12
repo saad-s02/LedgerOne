@@ -151,4 +151,38 @@ public class ListTransactionsHandlerTests : IDisposable
         var response = await _sut.Handle(new ListTransactionsRequest(), ct);
         response.Data.Select(d => d.AccountId).Should().ContainInOrder("NEW", "MID", "OLD");
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task Handle_PageBelow1_ThrowsValidationException(int badPage)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var act = () => _sut.Handle(new ListTransactionsRequest { Page = badPage }, ct);
+        var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
+        ex.Which.Errors.Should().ContainKey("page");
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    [InlineData(101)]
+    [InlineData(1000)]
+    public async Task Handle_PageSizeOutOfRange_ThrowsValidationException(int badSize)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var act = () => _sut.Handle(new ListTransactionsRequest { PageSize = badSize }, ct);
+        var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
+        ex.Which.Errors.Should().ContainKey("pageSize");
+    }
+
+    [Fact]
+    public async Task Handle_BothPageAndPageSizeInvalid_ThrowsWithBothErrors()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var act = () => _sut.Handle(new ListTransactionsRequest { Page = 0, PageSize = 0 }, ct);
+        var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
+        ex.Which.Errors.Should().ContainKey("page");
+        ex.Which.Errors.Should().ContainKey("pageSize");
+    }
 }
