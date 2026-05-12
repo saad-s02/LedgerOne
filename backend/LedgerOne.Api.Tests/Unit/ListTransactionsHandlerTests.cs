@@ -87,4 +87,36 @@ public class ListTransactionsHandlerTests : IDisposable
         var response = await _sut.Handle(new ListTransactionsRequest { PageSize = pageSize }, ct);
         response.TotalPages.Should().Be(expectedTotalPages);
     }
+
+    [Fact]
+    public async Task Handle_WithDefaultRequest_UsesPage1AndPageSize25()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(10);
+        var response = await _sut.Handle(new ListTransactionsRequest(), ct);
+        response.Page.Should().Be(1);
+        response.PageSize.Should().Be(25);
+        response.Data.Should().HaveCount(10);
+    }
+
+    [Fact]
+    public async Task Handle_WithEmptyDb_ReturnsZeroTotalAndEmptyData()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var response = await _sut.Handle(new ListTransactionsRequest(), ct);
+        response.Total.Should().Be(0);
+        response.Data.Should().BeEmpty();
+        response.TotalPages.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Handle_PageExceedsTotalPages_ReturnsEmptyDataButCorrectTotal()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(10);
+        var response = await _sut.Handle(new ListTransactionsRequest { Page = 99, PageSize = 25 }, ct);
+        response.Total.Should().Be(10);
+        response.Data.Should().BeEmpty();
+        response.Page.Should().Be(99);
+    }
 }
