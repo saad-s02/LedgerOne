@@ -57,4 +57,18 @@ public class ListTransactionsHandlerTests : IDisposable
         var response = await _sut.Handle(new ListTransactionsRequest(), ct);
         response.Total.Should().Be(73);
     }
+
+    [Fact]
+    public async Task Handle_Page2WithPageSize25_ReturnsRows26Through50()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(60);
+        var response = await _sut.Handle(new ListTransactionsRequest { Page = 2, PageSize = 25 }, ct);
+        response.Data.Should().HaveCount(25);
+        // Default sort is TransactionDate DESC, so newest first.
+        // Row index in seed order: 0 has earliest date, 59 has latest.
+        // After DESC sort, page 1 = rows 59..35, page 2 = rows 34..10.
+        response.Data.First().AccountId.Should().Be("ACCT-00034");
+        response.Data.Last().AccountId.Should().Be("ACCT-00010");
+    }
 }
