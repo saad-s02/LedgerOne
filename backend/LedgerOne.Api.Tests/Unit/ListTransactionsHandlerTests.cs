@@ -71,4 +71,20 @@ public class ListTransactionsHandlerTests : IDisposable
         response.Data.First().AccountId.Should().Be("ACCT-00034");
         response.Data.Last().AccountId.Should().Be("ACCT-00010");
     }
+
+    [Theory]
+    [InlineData(0, 25, 0)]
+    [InlineData(1, 25, 1)]
+    [InlineData(25, 25, 1)]
+    [InlineData(26, 25, 2)]
+    [InlineData(73, 25, 3)]
+    [InlineData(100, 25, 4)]
+    [InlineData(101, 25, 5)]
+    public async Task Handle_ComputesTotalPagesCorrectly(int rowCount, int pageSize, int expectedTotalPages)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(rowCount);
+        var response = await _sut.Handle(new ListTransactionsRequest { PageSize = pageSize }, ct);
+        response.TotalPages.Should().Be(expectedTotalPages);
+    }
 }
