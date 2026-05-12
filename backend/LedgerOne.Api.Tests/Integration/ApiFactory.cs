@@ -23,6 +23,10 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         return base.CreateHost(builder);
     }
 
+    // Exposed so subclasses can call WebApplicationFactory<Program>.CreateHost directly,
+    // bypassing the Testing-env override in this class.
+    protected IHost CreateHostCore(IHostBuilder builder) => base.CreateHost(builder);
+
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public new async ValueTask DisposeAsync()
