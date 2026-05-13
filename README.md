@@ -3,8 +3,8 @@
 PriceMetrix take-home built on the React + .NET + SQL stack. See `PRD.md` for the
 product spec and `docs/superpowers/specs/` for the implementation design.
 
-This is **sub-project 1 of 3** (foundation + paginated list view). Filters,
-detail view, and the AI agent are scoped to subsequent sub-projects.
+Sub-projects 1 (paginated list), 2 (filters, detail view), and 3 (AI agent) are
+all implemented on this branch.
 
 ## Stack
 
@@ -62,13 +62,54 @@ Tests run in TDD discipline: every behavior has a failing test first.
   that uses a separate `ledgerone.testing.db` and exposes `/api/test/seed` +
   `/api/test/clear` for fixture management.
 
+## Chat (AI Agent)
+
+The list page has a right-side chat drawer powered by Anthropic Claude Haiku 4.5. The agent has two read-only tools:
+
+- `search_transactions` — wraps the list endpoint (full filter set + 20-row server cap).
+- `get_transaction` — wraps the detail endpoint.
+
+The chat endpoint runs a manual ReAct loop with a hard 5-iteration cap and a 60-second timeout. Tool dispatch shares the same handlers the REST API uses (`ITransactionTools` → `ListTransactionsHandler` / `GetTransactionHandler`), so the agent and the UI see the same data with no duplication.
+
+### Setup
+
+Set `ANTHROPIC_API_KEY` in your shell or .NET user-secrets:
+
+```bash
+dotnet user-secrets set ANTHROPIC_API_KEY sk-ant-... --project backend/LedgerOne.Api
+```
+
+If the key is unset, the chat endpoint returns **503 Problem Details** (`title: "Chat is not configured."`); the rest of the dashboard continues to work.
+
+### Live smoke test (opt-in, ~$0.001/run)
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-... dotnet test --filter "FullyQualifiedName~Smoke"
+```
+
+Skipped silently when no key is present. CI never runs it.
+
+### Why Haiku 4.5 (not Sonnet 4.6)
+
+Three well-described tools over a tabular dataset is exactly the structured tool-routing task Haiku 4.5 is tuned for. ~3× cheaper per token, ~2× lower latency. The model id lives in `appsettings.json` under `Chat:Model` and is swappable without code changes.
+
+### Future work (called out by design)
+
+- `aggregate_transactions` tool (sums, counts, group-by).
+- Streaming responses (SSE) — current shape is one-shot.
+- Conversation persistence across sessions.
+- UI controls for `minAmount`/`maxAmount` filters in the filter bar (already on the API).
+- Rate limiting on `/api/chat`.
+- Evaluation harness for query accuracy.
+- Cost / token observability dashboard.
+
 ## Scope notes
 
-Built as sub-project 1 of a decomposed implementation plan:
+Built as a decomposed implementation plan across three sub-projects (all on this branch):
 
-- **Sub-project 1 (this branch):** scaffolds, data model, paginated list (no filters).
-- **Sub-project 2 (deferred):** filters, sort, detail view, status pills, debouncing.
-- **Sub-project 3 (deferred):** AI agent layer (chat endpoint, tools, ReAct loop).
+- **Sub-project 1:** scaffolds, data model, paginated list (no filters).
+- **Sub-project 2:** filters, sort, detail view, status pills, debouncing.
+- **Sub-project 3:** AI agent layer (chat endpoint, tools, ReAct loop).
 
 See `docs/superpowers/specs/2026-05-12-investment-dashboard-foundation-design.md`
 and `docs/superpowers/plans/2026-05-12-investment-dashboard-foundation.md` for the
