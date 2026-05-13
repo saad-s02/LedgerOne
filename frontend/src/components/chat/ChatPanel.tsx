@@ -107,7 +107,10 @@ export function ChatPanel({ isOpen }: { isOpen: boolean }) {
           messages.map((m) => <MessageBubble key={m.id} message={m} />)
         )}
         {mutation.isPending && (
-          <div className="text-sm italic text-slate-500" data-testid="thinking-indicator">
+          <div
+            className="font-mono text-[11px] uppercase tracking-[0.1em] text-text-dim"
+            data-testid="thinking-indicator"
+          >
             Thinking…
           </div>
         )}
@@ -116,7 +119,7 @@ export function ChatPanel({ isOpen }: { isOpen: boolean }) {
             type="button"
             onClick={retry}
             data-testid="chat-retry"
-            className="rounded bg-red-600 px-3 py-1 text-sm text-white"
+            className="rounded-[3px] border border-rose-500/50 bg-rose-500/[0.08] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-rose-400 hover:bg-rose-500/[0.15]"
           >
             Retry
           </button>
