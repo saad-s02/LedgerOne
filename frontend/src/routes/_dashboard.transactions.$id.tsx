@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTransaction, transactionDetailKey } from '../api/transactions';
@@ -9,6 +10,7 @@ import { StatusPill } from '../components/StatusPill';
 import { TypeLabel } from '../components/TypeLabel';
 import { Button } from '../components/Button';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { usePanelExclusion } from '../components/PanelExclusion';
 import { formatAmount } from '../lib/format';
 
 export const Route = createFileRoute('/_dashboard/transactions/$id')({
@@ -19,8 +21,21 @@ function DetailRoute() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const numericId = Number(id);
+  const { active } = usePanelExclusion();
 
   const close = () => navigate({ to: '/', search: (prev) => prev as ListSearch });
+
+  // Mutex: if chat takes over while detail is showing, navigate away so
+  // detail unmounts. The ref guards against the initial-mount race when the
+  // user opens detail while chat was already active — without it we'd
+  // navigate back to / before DetailSheet's effect can claim 'detail'.
+  const claimedActiveRef = useRef(false);
+  useEffect(() => {
+    if (active === 'detail') claimedActiveRef.current = true;
+    if (claimedActiveRef.current && active === 'chat') {
+      navigate({ to: '/', search: (prev) => prev as ListSearch });
+    }
+  }, [active, navigate]);
 
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: transactionDetailKey(numericId),
