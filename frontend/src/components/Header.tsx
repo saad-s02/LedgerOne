@@ -55,6 +55,13 @@ export function Header() {
             >
               API Docs
             </Link>
+            <Link
+              to="/logs"
+              activeProps={{ className: `${NAV_BASE} ${NAV_ACTIVE}` }}
+              inactiveProps={{ className: `${NAV_BASE} ${NAV_INACTIVE}` }}
+            >
+              Logs
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-6 font-mono text-[11px] text-text-dim">

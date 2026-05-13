@@ -7,11 +7,15 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var inMemoryLogSink = new LedgerOne.Api.Infrastructure.Logging.InMemoryLogSink();
+builder.Services.AddSingleton(inMemoryLogSink);
+
 builder.Host.UseSerilog((ctx, lc) => lc
     .ReadFrom.Configuration(ctx.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"));
+        "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.Sink(inMemoryLogSink));
 
 var mvc = builder.Services.AddControllers().AddJsonOptions(opts =>
 {
@@ -48,6 +52,7 @@ if (allowedOrigins.Length > 0)
 
 builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.ListTransactionsHandler>();
 builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.GetTransactionHandler>();
+builder.Services.AddScoped<LedgerOne.Api.Features.Logs.ListLogsHandler>();
 builder.Services.AddScoped<LedgerOne.Api.Features.Chat.ITransactionTools, LedgerOne.Api.Features.Chat.TransactionTools>();
 builder.Services.AddScoped<LedgerOne.Api.Features.Chat.ChatHandler>();
 builder.Services.AddSingleton<LedgerOne.Api.Features.Chat.IChatAgent, LedgerOne.Api.Features.Chat.AnthropicChatAgent>();
