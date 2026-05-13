@@ -1,0 +1,38 @@
+# Fly.io app config for the LedgerOne backend.
+# `fly launch --no-deploy --copy-config` will prompt for an app name and region;
+# accept the defaults or override the `app` key below before `fly deploy`.
+
+app = "ledgerone-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+  ASPNETCORE_URLS = "http://+:8080"
+  ConnectionStrings__Default = "Data Source=/data/ledgerone.db"
+  # Seed 8k deterministic rows on first boot (empty DB only). Flip to "false"
+  # once the volume has data you want to keep.
+  Seed__OnStartup = "true"
+  # CORS allowed origins — set the Vercel URL via:
+  #   fly secrets set Cors__AllowedOrigins__0=https://<your-app>.vercel.app
+  # (Multiple origins: add __1, __2, ...)
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Keep a single machine warm so the demo doesn't pay a cold-start.
+  # Flip auto_stop_machines to "stop" and min_machines_running to 0 to save
+  # free-tier hours once the demo is over.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[mounts]]
+  source = "ledgerone_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

@@ -21,14 +21,22 @@ var mvc = builder.Services.AddControllers().AddJsonOptions(opts =>
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<LedgerOne.Api.Infrastructure.ProblemDetails.GlobalExceptionHandler>();
 
-const string DevCorsPolicy = "DevCorsPolicy";
-builder.Services.AddCors(opts =>
+const string CorsPolicy = "DefaultCorsPolicy";
+var configuredOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+var devDefaultOrigins = (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
+    ? new[] { "http://localhost:5173" }
+    : Array.Empty<string>();
+var allowedOrigins = configuredOrigins.Length > 0 ? configuredOrigins : devDefaultOrigins;
+if (allowedOrigins.Length > 0)
 {
-    opts.AddPolicy(DevCorsPolicy, p => p
-        .WithOrigins("http://localhost:5173")
-        .AllowAnyHeader()
-        .AllowAnyMethod());
-});
+    builder.Services.AddCors(opts =>
+    {
+        opts.AddPolicy(CorsPolicy, p => p
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+    });
+}
 
 builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.ListTransactionsHandler>();
 
@@ -40,9 +48,9 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
+if (allowedOrigins.Length > 0)
 {
-    app.UseCors(DevCorsPolicy);
+    app.UseCors(CorsPolicy);
 }
 
 app.UseMiddleware<CorrelationIdMiddleware>();
@@ -56,9 +64,14 @@ using (var scope = app.Services.CreateScope())
     {
         await db.Database.ExecuteSqlRawAsync("DELETE FROM Transactions");
     }
-    else if (app.Environment.IsDevelopment() && !await db.Transactions.AnyAsync())
+    else
     {
-        await DevSeeder.SeedAsync(db, CancellationToken.None);
+        var seedOnStartup = app.Configuration.GetValue<bool?>("Seed:OnStartup")
+            ?? app.Environment.IsDevelopment();
+        if (seedOnStartup && !await db.Transactions.AnyAsync())
+        {
+            await DevSeeder.SeedAsync(db, CancellationToken.None);
+        }
     }
 }
 
