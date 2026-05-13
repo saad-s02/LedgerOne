@@ -145,3 +145,12 @@ test('Search input debounces ~300ms before URL updates', async ({ page }) => {
   // After debounce window, URL should contain ?search=AAPL.
   await expect(page).toHaveURL(/[?&]search=AAPL(&|$)/, { timeout: 1000 });
 });
+
+test('changing a filter from page=2 returns to page=1', async ({ page }) => {
+  await page.goto('/?page=2');
+  await expect(page.getByText('Page 2 of 3')).toBeVisible();
+
+  await page.getByLabel('Type').selectOption('Buy');
+
+  await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+});
