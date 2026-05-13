@@ -197,4 +197,55 @@ public class ListTransactionsHandlerTests : IDisposable
         ex.Which.Errors.Should().ContainKey("page");
         ex.Which.Errors.Should().ContainKey("pageSize");
     }
+
+    [Fact]
+    public async Task Handle_SortByDateAscending_ReturnsOldestFirst()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "OLD", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "NEW", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "MID", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { SortBy = SortField.Date, SortDir = SortDirection.Asc },
+            ct);
+
+        response.Data.Select(d => d.AccountId).Should().ContainInOrder("OLD", "MID", "NEW");
+    }
+
+    [Fact]
+    public async Task Handle_SortByAmountDescending_ReturnsLargestFirst()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "SMALL", AdvisorName = "x", Type = TransactionType.Buy, Amount = 10m, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "BIG", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1000m, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "MID", AdvisorName = "x", Type = TransactionType.Buy, Amount = 100m, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { SortBy = SortField.Amount, SortDir = SortDirection.Desc },
+            ct);
+
+        response.Data.Select(d => d.AccountId).Should().ContainInOrder("BIG", "MID", "SMALL");
+    }
+
+    [Fact]
+    public async Task Handle_SortByAmountAscending_ReturnsSmallestFirst()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "SMALL", AdvisorName = "x", Type = TransactionType.Buy, Amount = 10m, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "BIG", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1000m, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "MID", AdvisorName = "x", Type = TransactionType.Buy, Amount = 100m, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { SortBy = SortField.Amount, SortDir = SortDirection.Asc },
+            ct);
+
+        response.Data.Select(d => d.AccountId).Should().ContainInOrder("SMALL", "MID", "BIG");
+    }
 }
