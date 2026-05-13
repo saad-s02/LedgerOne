@@ -22,6 +22,12 @@ var mvc = builder.Services.AddControllers().AddJsonOptions(opts =>
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<LedgerOne.Api.Infrastructure.ProblemDetails.GlobalExceptionHandler>();
 
+builder.Services.AddOpenApi("v1", opts =>
+{
+    opts.AddDocumentTransformer<LedgerOne.Api.Infrastructure.OpenApi.LedgerOneDocumentTransformer>();
+    opts.AddOperationTransformer<LedgerOne.Api.Infrastructure.OpenApi.OperationIdTransformer>();
+});
+
 const string CorsPolicy = "DefaultCorsPolicy";
 var configuredOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 var devDefaultOrigins = (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
@@ -35,7 +41,8 @@ if (allowedOrigins.Length > 0)
         opts.AddPolicy(CorsPolicy, p => p
             .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            .WithExposedHeaders("X-Correlation-Id"));
     });
 }
 
@@ -93,6 +100,7 @@ app.Use(async (context, next) =>
     await next(context);
 });
 
+app.MapOpenApi();
 app.MapControllers();
 app.Run();
 
