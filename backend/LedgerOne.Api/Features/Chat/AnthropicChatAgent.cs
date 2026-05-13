@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Anthropic;
 using Anthropic.Models.Messages;
 using LedgerOne.Api.Infrastructure.Errors;
@@ -14,6 +15,7 @@ public class AnthropicChatAgent(
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter() },
     };
 
     public async Task<ChatAgentResult> RunAsync(
