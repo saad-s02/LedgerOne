@@ -125,3 +125,15 @@ test('Sort dropdown changes URL and reorders rows by amount desc', async ({ page
   const parse = (s: string | null) => parseFloat((s ?? '').replace(/[^\d.]/g, ''));
   expect(parse(firstAmount)).toBeGreaterThanOrEqual(parse(secondAmount));
 });
+
+test('Page-size selector changes rows-per-page and resets page to 1', async ({ page }) => {
+  await page.goto('/?page=2');
+  await expect(page.getByText('Page 2 of 3')).toBeVisible();
+
+  await page.getByLabel('Page size').selectOption('50');
+
+  await expect(page).toHaveURL(/[?&]pageSize=50(&|$)/);
+  await expect(page).toHaveURL(/[?&]page=1(&|$)/);
+  await expect(page.locator('tbody tr[data-testid="skeleton-row"]')).toHaveCount(0);
+  await expect(page.locator('tbody tr')).toHaveCount(50);
+});

@@ -1,3 +1,4 @@
+import { ALLOWED_PAGE_SIZES } from '../lib/listSearch';
 import type { ListSearch } from '../lib/listSearch';
 import type { TransactionType, TransactionStatus } from '../api/transactions';
 
@@ -81,6 +82,20 @@ export function FilterBar({ value, onChange }: Props) {
           <option value="date:asc">Date (oldest)</option>
           <option value="amount:desc">Amount (high to low)</option>
           <option value="amount:asc">Amount (low to high)</option>
+        </select>
+      </label>
+      <label className="flex flex-col text-xs text-gray-600">
+        <span>Page size</span>
+        <select
+          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          value={value.pageSize}
+          onChange={(e) => onChange({ pageSize: Number(e.target.value) })}
+        >
+          {ALLOWED_PAGE_SIZES.map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
         </select>
       </label>
     </div>
