@@ -2,7 +2,7 @@
 # `fly launch --no-deploy --copy-config` will prompt for an app name and region;
 # accept the defaults or override the `app` key below before `fly deploy`.
 
-app = "ledgerone-api"
+app = "ledgerone-api-saadsidd"
 primary_region = "iad"
 
 [build]
