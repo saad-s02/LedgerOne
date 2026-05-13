@@ -55,7 +55,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
-    if (app.Environment.IsDevelopment() && !await db.Transactions.AnyAsync())
+    if (app.Environment.IsEnvironment("Testing"))
+    {
+        await db.Database.ExecuteSqlRawAsync("DELETE FROM Transactions");
+    }
+    else if (app.Environment.IsDevelopment() && !await db.Transactions.AnyAsync())
     {
         await DevSeeder.SeedAsync(db, CancellationToken.None);
     }
