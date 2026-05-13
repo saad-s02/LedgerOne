@@ -40,13 +40,13 @@ function DocsPage() {
   });
 
   if (isPending) {
-    return <div className="text-sm text-gray-600">Loading API spec…</div>;
+    return <div className="text-sm text-text-dim">Loading API spec…</div>;
   }
   if (isError) {
     return (
-      <div className="rounded border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+      <div className="rounded border border-rose-500/40 bg-rose-500/[0.05] p-4 text-sm text-rose-200">
         Couldn&apos;t load /openapi/v1.json: {error instanceof Error ? error.message : String(error)}
-        <div className="mt-2 text-xs text-red-800">
+        <div className="mt-2 text-xs text-rose-300">
           Is the backend running on{' '}
           <code className="font-mono">
             {import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000'}
@@ -122,9 +122,11 @@ function SectionHeader({
 }) {
   return (
     <header id={id} className="scroll-mt-6">
-      {eyebrow && <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">{eyebrow}</div>}
-      <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
-      {description && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600">{description}</p>}
+      {eyebrow && (
+        <div className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan">{eyebrow}</div>
+      )}
+      <h2 className="font-mono text-[18px] font-semibold uppercase tracking-[0.1em] text-text-bright">{title}</h2>
+      {description && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-dim">{description}</p>}
     </header>
   );
 }
@@ -146,10 +148,10 @@ function Overview({ spec, operationCount }: { spec: OpenApiDocument; operationCo
         <Stat label="Environment" value={server?.description ?? '—'} />
       </div>
       {spec.info.contact?.email && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-text-dim">
           Contact: {spec.info.contact.name}{' '}
           &lt;
-          <a className="text-blue-700 hover:underline" href={`mailto:${spec.info.contact.email}`}>
+          <a className="text-cyan hover:underline" href={`mailto:${spec.info.contact.email}`}>
             {spec.info.contact.email}
           </a>
           &gt;
@@ -161,9 +163,9 @@ function Overview({ spec, operationCount }: { spec: OpenApiDocument; operationCo
 
 function Stat({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3">
-      <div className="text-xs uppercase tracking-wider text-gray-500">{label}</div>
-      <div className={'mt-1 text-sm font-semibold text-gray-900 ' + (mono ? 'font-mono' : '')}>{value}</div>
+    <div className="rounded-lg border border-line bg-bg-elev p-3">
+      <div className="text-xs uppercase tracking-wider text-text-dim">{label}</div>
+      <div className={'mt-1 text-sm font-semibold text-text-bright ' + (mono ? 'font-mono' : '')}>{value}</div>
     </div>
   );
 }
@@ -172,16 +174,16 @@ function Authentication() {
   return (
     <section className="space-y-3">
       <SectionHeader id="authentication" title="Authentication" />
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
-        <p className="text-sm leading-relaxed text-gray-700">
+      <div className="rounded-lg border border-line bg-bg-elev p-5">
+        <p className="text-sm leading-relaxed text-text">
           The prototype runs single-tenant and does not authenticate requests. The dashboard, the agent, and any direct
           API consumer all see the same data.
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-gray-700">
+        <p className="mt-3 text-sm leading-relaxed text-text">
           For production: JWT bearer tokens at the gateway, tenant claim extracted at the controller boundary, and an EF
           Core global query filter that pins every query to <code className="font-mono text-xs">WHERE TenantId = @currentTenant</code>.
           The chat endpoint additionally needs rate limiting and prompt-injection guardrails. See{' '}
-          <a className="text-blue-700 hover:underline" href="#decision-no-multi-tenant">
+          <a className="text-cyan hover:underline" href="#decision-no-multi-tenant">
             Decision #4 — No multi-tenant model
           </a>
           .
@@ -207,7 +209,7 @@ function Endpoints({
       />
       {Array.from(operationsByTag.entries()).map(([tag, ops]) => (
         <div key={tag} className="space-y-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">{tag}</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-text-dim">{tag}</h3>
           <div className="space-y-5">
             {ops.map((op) => (
               <EndpointCard
@@ -246,11 +248,11 @@ function DataModel() {
         title="Data model"
         description="The entire dashboard is one entity, by design. A single denormalized table is faster to query, simpler to seed, and easier to reason about — we documented the tradeoff rather than hiding it behind joins."
       />
-      <div className="rounded-lg border border-gray-200 bg-white p-5 space-y-4">
-        <h4 className="text-sm font-semibold text-gray-900">Transaction</h4>
-        <div className="overflow-hidden rounded border border-gray-200">
+      <div className="rounded-lg border border-line bg-bg-elev p-5 space-y-4">
+        <h4 className="text-sm font-semibold text-text-bright">Transaction</h4>
+        <div className="overflow-hidden rounded border border-line">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+            <thead className="bg-bg-elev text-xs uppercase tracking-wider text-text-dim">
               <tr>
                 <th className="px-3 py-2 text-left">Field</th>
                 <th className="px-3 py-2 text-left">Type</th>
@@ -259,18 +261,18 @@ function DataModel() {
             </thead>
             <tbody>
               {transactionFields.map((f) => (
-                <tr key={f.field} className="border-t border-gray-100">
-                  <td className="px-3 py-2 font-mono text-xs text-gray-900">{f.field}</td>
-                  <td className="px-3 py-2 font-mono text-xs text-gray-700">{f.type}</td>
-                  <td className="px-3 py-2 text-xs text-gray-600">{f.notes}</td>
+                <tr key={f.field} className="border-t border-line">
+                  <td className="px-3 py-2 font-mono text-xs text-text-bright">{f.field}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-text">{f.type}</td>
+                  <td className="px-3 py-2 text-xs text-text-dim">{f.notes}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <div>
-          <h4 className="mb-1 text-sm font-semibold text-gray-900">Indexes</h4>
-          <ul className="list-inside list-disc space-y-1 text-sm text-gray-700">
+          <h4 className="mb-1 text-sm font-semibold text-text-bright">Indexes</h4>
+          <ul className="list-inside list-disc space-y-1 text-sm text-text">
             <li>
               <code className="font-mono text-xs">IX_Transactions_Status_Date</code> — composite on{' '}
               <code className="font-mono text-xs">(Status, TransactionDate DESC)</code>. Serves &quot;recent pending&quot; and
@@ -314,9 +316,9 @@ function ScaleConsiderations() {
       />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {SCALE_NOTES.map((n) => (
-          <div key={n.topic} className="rounded-lg border border-gray-200 bg-white p-4">
-            <h4 className="text-sm font-semibold text-gray-900">{n.topic}</h4>
-            <p className="mt-1 text-sm leading-relaxed text-gray-700">{n.body}</p>
+          <div key={n.topic} className="rounded-lg border border-line bg-bg-elev p-4">
+            <h4 className="text-sm font-semibold text-text-bright">{n.topic}</h4>
+            <p className="mt-1 text-sm leading-relaxed text-text">{n.body}</p>
           </div>
         ))}
       </div>
@@ -334,9 +336,9 @@ function Observability() {
       />
       <div className="space-y-3">
         {OBSERVABILITY_POINTS.map((p) => (
-          <div key={p.title} className="rounded-lg border border-gray-200 bg-white p-4">
-            <h4 className="text-sm font-semibold text-gray-900">{p.title}</h4>
-            <p className="mt-1 text-sm leading-relaxed text-gray-700">{p.body}</p>
+          <div key={p.title} className="rounded-lg border border-line bg-bg-elev p-4">
+            <h4 className="text-sm font-semibold text-text-bright">{p.title}</h4>
+            <p className="mt-1 text-sm leading-relaxed text-text">{p.body}</p>
           </div>
         ))}
       </div>
@@ -354,13 +356,13 @@ function FutureImprovements() {
       />
       <ol className="space-y-3">
         {FUTURE_IMPROVEMENTS.map((f) => (
-          <li key={f.rank} className="flex gap-3 rounded-lg border border-gray-200 bg-white p-4">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-700">
+          <li key={f.rank} className="flex gap-3 rounded-lg border border-line bg-bg-elev p-4">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bg-elev-2 font-mono text-xs font-semibold text-text">
               {f.rank}
             </span>
             <div>
-              <h4 className="text-sm font-semibold text-gray-900">{f.title}</h4>
-              <p className="mt-1 text-sm leading-relaxed text-gray-700">{f.body}</p>
+              <h4 className="text-sm font-semibold text-text-bright">{f.title}</h4>
+              <p className="mt-1 text-sm leading-relaxed text-text">{f.body}</p>
             </div>
           </li>
         ))}
