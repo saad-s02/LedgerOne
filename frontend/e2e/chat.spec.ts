@@ -11,7 +11,9 @@ test.describe('Chat drawer', () => {
     await expect(page.getByText('Try asking…')).toBeVisible();
   });
 
-  test('clicking a seed prompt sends a user message and renders the response with a tool card', async ({ page }) => {
+  test('clicking a seed prompt sends a user message and renders the response with a tool card', async ({
+    page,
+  }) => {
     const stub = chatStub(page);
     stub.queue({ kind: 'ok', body: happyResponse('Found 3 pending buys.') });
 
@@ -20,7 +22,9 @@ test.describe('Chat drawer', () => {
     await page.getByTestId('seed-prompts').getByRole('button').first().click();
 
     await expect(page.getByTestId('message-user').first()).toBeVisible();
-    await expect(page.getByTestId('message-assistant').first()).toContainText('Found 3 pending buys.');
+    await expect(page.getByTestId('message-assistant').first()).toContainText(
+      'Found 3 pending buys.',
+    );
     await expect(page.getByTestId('tool-call-card')).toHaveCount(1);
   });
 

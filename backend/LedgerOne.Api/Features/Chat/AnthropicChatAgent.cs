@@ -152,24 +152,24 @@ public class AnthropicChatAgent(
             switch (tu.Name)
             {
                 case "search_transactions":
-                {
-                    var args = ParseArgs<SearchTransactionsArgs>(tu.Input);
-                    result = await tools.SearchTransactionsAsync(args, ct);
-                    break;
-                }
+                    {
+                        var args = ParseArgs<SearchTransactionsArgs>(tu.Input);
+                        result = await tools.SearchTransactionsAsync(args, ct);
+                        break;
+                    }
                 case "get_transaction":
-                {
-                    var args = ParseArgs<GetTransactionArgs>(tu.Input);
-                    result = await tools.GetTransactionAsync(args, ct);
-                    break;
-                }
+                    {
+                        var args = ParseArgs<GetTransactionArgs>(tu.Input);
+                        result = await tools.GetTransactionAsync(args, ct);
+                        break;
+                    }
                 default:
-                {
-                    logger.LogWarning("Unknown tool requested: {Tool}", tu.Name);
-                    result = JsonSerializer.SerializeToElement(
-                        new { error = $"Unknown tool: {tu.Name}." });
-                    break;
-                }
+                    {
+                        logger.LogWarning("Unknown tool requested: {Tool}", tu.Name);
+                        result = JsonSerializer.SerializeToElement(
+                            new { error = $"Unknown tool: {tu.Name}." });
+                        break;
+                    }
             }
             var isError = result.TryGetProperty("error", out _);
             return (result, isError);

@@ -13,7 +13,9 @@ function summarizeArgs(tool: string, args: Record<string, unknown>): string {
 }
 
 export function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
-  const borderClass = toolCall.isError ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-slate-50';
+  const borderClass = toolCall.isError
+    ? 'border-red-300 bg-red-50'
+    : 'border-slate-200 bg-slate-50';
 
   return (
     <details

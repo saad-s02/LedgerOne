@@ -19,7 +19,11 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
     : 'bg-slate-100 text-slate-900';
 
   return (
-    <div className="flex flex-col items-start gap-2" data-testid="message-assistant" data-error={isError ? 'true' : 'false'}>
+    <div
+      className="flex flex-col items-start gap-2"
+      data-testid="message-assistant"
+      data-error={isError ? 'true' : 'false'}
+    >
       {message.toolCalls.map((tc, i) => (
         <ToolCallCard key={`${message.id}-tc-${i}`} toolCall={tc} />
       ))}

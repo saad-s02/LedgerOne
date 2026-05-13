@@ -24,7 +24,10 @@ export function Composer({
   };
 
   return (
-    <div className="flex items-end gap-2 border-t border-slate-200 bg-white p-3" data-testid="composer">
+    <div
+      className="flex items-end gap-2 border-t border-slate-200 bg-white p-3"
+      data-testid="composer"
+    >
       <textarea
         aria-label="Chat message"
         className="min-h-[60px] flex-1 resize-none rounded border border-slate-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"

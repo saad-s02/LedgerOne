@@ -449,14 +449,30 @@ public class ListTransactionsHandlerTests : IDisposable
     {
         var ct = TestContext.Current.CancellationToken;
         _db.Transactions.AddRange(
-            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                AccountId = "ACCT-00001", AdvisorName = "Sarah Chen", Type = TransactionType.Buy,
-                SecuritySymbol = "AAPL", Amount = 100m, Currency = Currency.CAD,
-                Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
-            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc),
-                AccountId = "ACCT-00002", AdvisorName = "Mike Smith", Type = TransactionType.Buy,
-                SecuritySymbol = "AAPL", Amount = 200m, Currency = Currency.CAD,
-                Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+            new Transaction
+            {
+                TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                AccountId = "ACCT-00001",
+                AdvisorName = "Sarah Chen",
+                Type = TransactionType.Buy,
+                SecuritySymbol = "AAPL",
+                Amount = 100m,
+                Currency = Currency.CAD,
+                Status = TransactionStatus.Settled,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Transaction
+            {
+                TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc),
+                AccountId = "ACCT-00002",
+                AdvisorName = "Mike Smith",
+                Type = TransactionType.Buy,
+                SecuritySymbol = "AAPL",
+                Amount = 200m,
+                Currency = Currency.CAD,
+                Status = TransactionStatus.Settled,
+                CreatedAt = DateTime.UtcNow
+            });
         _db.SaveChanges();
 
         var response = await _sut.Handle(new ListTransactionsRequest { Search = "Sarah" }, ct);

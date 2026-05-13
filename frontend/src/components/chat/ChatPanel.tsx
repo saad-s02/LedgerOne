@@ -96,7 +96,11 @@ export function ChatPanel({ isOpen }: { isOpen: boolean }) {
 
   return (
     <div className="flex h-full flex-col" data-testid="chat-panel">
-      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-4" data-testid="message-list">
+      <div
+        ref={listRef}
+        className="flex-1 space-y-3 overflow-y-auto p-4"
+        data-testid="message-list"
+      >
         {messages.length === 0 && !mutation.isPending ? (
           <SeedPrompts onSend={send} disabled={mutation.isPending} />
         ) : (
