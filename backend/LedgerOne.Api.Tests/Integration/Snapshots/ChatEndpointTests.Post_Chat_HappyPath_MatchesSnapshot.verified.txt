@@ -1,0 +1,1 @@
+﻿{"response":"Found 3 settled buys.","toolCalls":[{"tool":"search_transactions","args":{"type":"Buy","status":"Settled"},"result":{"total":3,"page":1,"pageSize":20},"isError":false}]}

@@ -1,6 +1,4 @@
-using FluentValidation;
 using LedgerOne.Api.Features.Chat;
-using LedgerOne.Api.Infrastructure.Validation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LedgerOne.Api.Controllers;
@@ -15,25 +13,25 @@ namespace LedgerOne.Api.Controllers;
 [Route("api/chat")]
 [Tags("Chat")]
 [Produces("application/json")]
-public class ChatController(IValidator<ChatRequest> validator) : ControllerBase
+public class ChatController(ChatHandler handler) : ControllerBase
 {
-    /// <summary>Send a user message and (eventually) receive a tool-augmented agent response.</summary>
+    /// <summary>Send a user message and receive a tool-augmented agent response.</summary>
     /// <remarks>
-    /// Request validation runs against <see cref="ChatRequestValidator"/>. Once
-    /// the agent ships, this endpoint will execute a ReAct loop capped at five
-    /// iterations, calling <c>search_transactions</c> / <c>get_transaction</c>
-    /// tools that re-use the same handlers as the REST endpoints — keeping the
-    /// agent's view of the world identical to the dashboard's.
+    /// Request validation runs against <see cref="ChatRequestValidator"/>. The
+    /// agent executes a ReAct loop capped at five iterations, calling
+    /// <c>search_transactions</c> / <c>get_transaction</c> tools that re-use
+    /// the same handlers as the REST endpoints — keeping the agent's view of
+    /// the world identical to the dashboard's.
     /// </remarks>
     [HttpPost]
     [ProducesResponseType(typeof(ChatResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status501NotImplemented)]
-    public async Task<IActionResult> Post(
+    [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<ChatResponse>> Post(
         [FromBody] ChatRequest request,
         CancellationToken ct)
     {
-        await validator.ValidateOrThrowAsync(request, ct);
-        return StatusCode(StatusCodes.Status501NotImplemented);
+        var response = await handler.Handle(request, ct);
+        return Ok(response);
     }
 }
