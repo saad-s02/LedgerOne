@@ -7,67 +7,104 @@
 The PRD (`PRD.md`) was previously decomposed into three sub-projects:
 
 1. **Sub-project 1 (done):** scaffolds, data model, dev seed, paginated list with no filters/sort/detail.
-2. **Sub-project 2 (backend done, frontend pending):** filters, sort, search, page-size, detail view, status pills, debouncing. See `docs/superpowers/specs/2026-05-13-sub-project-2-filters-sort-detail-design.md`.
-3. **Sub-project 3 (deferred):** chat endpoint, agent tools, ReAct loop, chat UI drawer.
+2. **Sub-project 2 (DONE as of commit `3ce3b39`):** filters, sort, search, page-size, detail page, status pills, debouncing, empty-state Clear Filters. Both backend and frontend complete. See `docs/superpowers/specs/2026-05-13-sub-project-2-filters-sort-detail-design.md`.
+3. **Sub-project 3 (specced, not built):** chat endpoint, agent tools, ReAct loop, chat UI drawer. Spec at `docs/superpowers/specs/2026-05-13-sub-project-3-ai-agent-design.md`, plan at `docs/superpowers/plans/2026-05-13-sub-project-3-ai-agent.md`.
 
-This spec sits across sub-projects 1 and 2 as a **visual + motion redesign** plus completion of the sub-project 2 frontend. It is one combined push (per brainstorming): foundation polish + design system + sub-project 2 UI features.
+This spec is therefore a **pure visual + motion redesign** of an already-functional application. Every PRD §6.1 / §6.2 behavior already works. What this spec adds is the Terminal Dense aesthetic, the design-system primitive layer, the motion choreography, and the structural shift from a full-route detail page to an overlay slide-in panel.
 
 The PRD's §3 Non-Goals explicitly excluded "Dark mode, animations, design polish beyond clean Tailwind." This spec is a deliberate override of that non-goal.
 
+## Current implementation state (rescanned 2026-05-13, branch `claude/add-dashboard-prd-zPf4J`)
+
+What already exists and ships:
+
+**Frontend files**
+
+| File | State | What it does today |
+|---|---|---|
+| `frontend/src/routes/__root.tsx` | unchanged from sub-project 1 | `<div bg-gray-50><header>LedgerOne</header><main><Outlet /></main></div>` |
+| `frontend/src/routes/index.tsx` | sub-project 2 final | List page: `<FilterBar>` + table (7 columns, right-aligned amount with `Intl.NumberFormat('en-CA')`, `<StatusPill>` in last cell, `<tr role="button" tabIndex={0}>` with click + Enter navigation to detail) + skeleton rows / error banner / empty-state with conditional Clear Filters / Prev/Next pagination |
+| `frontend/src/routes/transactions.$id.tsx` | sub-project 2 final | **Full-route** detail page (not an overlay). `<Link to="/" search={(prev) => prev}>← Back to list</Link>`, skeleton on load, "Transaction not found" on 404, retry banner on other errors, `<dl>` grid with all fields, `<StatusPill>`, Notes section |
+| `frontend/src/lib/listSearch.ts` | sub-project 2 final | Zod schema `listSearchSchema`, `DEFAULT_LIST_SEARCH`, `isAnyFilterActive(search)` helper. URL params: `page`, `pageSize` (25/50/100), `fromDate`, `toDate`, `type`, `status`, `search`, `sortBy` (date/amount), `sortDir` (asc/desc) |
+| `frontend/src/lib/useDebouncedValue.ts` | sub-project 2 final | Generic `useDebouncedValue<T>(value, delayMs)` hook |
+| `frontend/src/api/transactions.ts` | sub-project 2 final | `TransactionDto`, `TransactionDetailDto`, `ListTransactionsResponse`, `ListTransactionsParams`, `fetchTransactions`, `fetchTransaction`, `transactionsKey`, `transactionDetailKey` |
+| `frontend/src/api/client.ts` | sub-project 2 final | `apiGet`, `ApiError` (carries `status`) |
+| `frontend/src/components/StatusPill.tsx` | sub-project 2 final | Plain Tailwind pill: `bg-green-100 / bg-yellow-100 / bg-red-100`, `rounded-full px-2 py-0.5 text-xs font-medium` |
+| `frontend/src/components/SkeletonRows.tsx` | sub-project 2 final | `<tr data-testid="skeleton-row">` × N, each cell `animate-pulse bg-gray-200`. Used in `<tbody>` during `isPending`. |
+| `frontend/src/components/FilterBar.tsx` | sub-project 2 final | **Native `<select>` controls and `<input>`s** with `<label>` wrappers. Seven controls: Type, Status, From, To, Sort (combined `sortBy:sortDir`), Page size, Search. Search has internal `useState` + `useDebouncedValue(300)` synced to parent via `onChange`. |
+| `frontend/src/styles.css` | unchanged from sub-project 1 | Single line: `@import 'tailwindcss';` |
+| `frontend/package.json` | sub-project 2 final | No `motion`, no `@fontsource/*` |
+| `frontend/e2e/list.spec.ts` | sub-project 2 final | 15 tests including filter / sort / debounce / skeleton / pill / empty-state / clear-filters / pagination |
+| `frontend/e2e/detail.spec.ts` | sub-project 2 final | 3 tests: row-click navigation, Back-link returns to filtered URL, 404 state |
+
+**Working-tree changes that are not yet committed** (visible via `git status`): minor format/config sweeps to tsconfig, eslint, prettier, vite, package files, and a small `__root.tsx` modification. None of them touch the rendering logic.
+
 ## Relationship to the sub-project 2 spec
 
-The sub-project 2 spec stands for:
+The sub-project 2 spec stands for everything it specified. This new spec **does not undo any behavior** — it restyles and recomposes. Concretely:
 
-- Backend handlers and validation (`ListTransactionsHandler`, `GetTransactionHandler`, FluentValidation, `NotFoundException`, Problem Details).
-- API surface and query parameter contract.
-- URL search-param schema (filter / sort / page state).
-- TanStack Router file-based routing structure.
-- Test fixture (60-row deterministic seed).
-- Build order for backend work (mostly already shipped — commits `fbb0eea` … `cc9f391`).
+**Inherited unchanged from sub-project 2:**
 
-This spec **overrides** the sub-project 2 spec for:
+- All backend handlers and validation.
+- All API contracts and the 60-row fixture.
+- `listSearch.ts` (Zod schema, defaults, `isAnyFilterActive`) — used as-is by the new layout route.
+- `useDebouncedValue.ts` — used as-is by the new `SearchInput` primitive.
+- `api/transactions.ts` types and fetchers — used as-is, plus a new helper for the stat strip.
+- The `/transactions/{id}` URL contract — same path, same params, same back-navigation semantics (filters preserved).
 
-- All color, typography, spacing, radius, and shadow choices (sub-project 2's "bg-green-100" pills, plain skeleton rows, etc. are superseded).
-- Component decomposition (this spec introduces a design-system primitives folder).
-- Detail-view routing pattern: nested-overlay route instead of standalone page (URL contract unchanged).
-- Motion-related behaviors (skeleton shimmer, page transitions, pill pulses, etc.).
-- File layout under `frontend/src/` (consolidates primitives into `src/components/`).
+**Replaced (existing file rewritten) by this spec:**
 
-Where the two specs conflict, **this one wins**. Where this spec is silent, sub-project 2 governs.
+- `components/StatusPill.tsx` — green/yellow/red pastel → Terminal Dense green/amber/rose with the pulsing-halo Pending variant.
+- `components/SkeletonRows.tsx` — `animate-pulse` → cyan-tinted shimmer sweep + `data-motion-id` for test wiring. Keeps the `data-testid="skeleton-row"` attribute and `count` / `columns` props.
+- `components/FilterBar.tsx` — native `<select>` controls → chip groups (Type, Status), date-range pill with popover, click-on-header sort (no Sort dropdown), terminal-styled search input.
+- `routes/__root.tsx` — `<h1>LedgerOne</h1>` → full `<Header />` with logo, LIVE indicator, session ID, live clock + `<ScanBeam />`.
+- `routes/index.tsx` — moves into a pathless `_dashboard.tsx` layout; the file itself becomes `_dashboard.index.tsx` returning `null` (chrome lives in the layout).
+- `routes/transactions.$id.tsx` — full-route detail page → `_dashboard.transactions.$id.tsx` rendering an overlay `<DetailPanel />`. **This is the only behavioral change**: list stays mounted under the slide-in panel instead of unmounting. URL contract is preserved.
+- `styles.css` — adds `@theme` block with tokens and font imports.
+
+**Added (new files):**
+
+- Primitives layer (Header, ScanBeam, StatStrip, StatCard, Counter, Chip, SearchInput, DateRangePill, DataTable, DataRow, Sparkline, TypeLabel, AmountCell, PaginationBar, Button, DetailPanel, DetailField, EmptyState, ErrorBanner).
+- `lib/useReducedMotion.ts`, `lib/format.ts`.
+- `e2e/motion.spec.ts`.
+
+**Where the two specs conflict, this one wins. Where this spec is silent, sub-project 2 governs.**
 
 ## Goal
 
 After this spec executes:
 
 - The dashboard reads as a deliberate, distinctive "terminal-dense" data application — dark surfaces, monospace numerals, neon accents, heavy but purposeful motion.
-- Every PRD §6.1 filter / sort / pagination / state behavior works correctly.
-- The transaction detail view opens as a slide-in panel from the right, URL-routable.
+- Every PRD §6.1 / §6.2 behavior continues to work (already does — this spec restyles, it does not re-build).
+- The detail view opens as a slide-in panel over a still-mounted list, URL-routable at `/transactions/{id}`.
 - Every animation respects `prefers-reduced-motion: reduce`.
-- The whole frontend ships under one combined plan rather than two visual passes.
+- The Playwright suite stays green throughout — selector updates land in the same commit as the UI change that breaks them (per the Test compatibility table).
 
 ## Scope
 
 ### In scope
 
 - Add `motion` (Framer Motion v12, ~30 kB gz) and font loaders (`@fontsource/inter`, `@fontsource/jetbrains-mono`) as frontend dependencies.
-- Replace `src/styles.css` with a tokenized `@theme` block (CSS custom properties + Tailwind v4 utility generation).
-- Build the component primitive layer under `frontend/src/components/`.
-- Rewrite the root layout (`routes/__root.tsx`) — new `Header` with logo / LIVE / session / live-clock.
-- Build the stat strip on the list page (Total Transactions, Pending Settlement, Volume 24h, Active Advisors, all with animated counters and deltas).
-- Build the filter bar (type chips, status chips, date-range pill, search input) per sub-project 2 behaviors.
+- Rewrite `src/styles.css` with a tokenized `@theme` block (CSS custom properties + Tailwind v4 utility generation) + font imports.
+- Build the design-system primitive layer under `frontend/src/components/` — 18 new primitives.
+- Rewrite three existing components: `StatusPill.tsx`, `SkeletonRows.tsx`, `FilterBar.tsx`.
+- Rewrite the root layout (`routes/__root.tsx`) — full `<Header />` with logo / LIVE / session / live-clock + `<ScanBeam />`.
+- Migrate the list route into a pathless `_dashboard.tsx` layout (the list-rendering logic moves out of `routes/index.tsx` into `routes/_dashboard.tsx`; `routes/index.tsx` is deleted).
+- Migrate the detail route from a full-route page (`routes/transactions.$id.tsx`) to an overlay panel (`routes/_dashboard.transactions.$id.tsx`).
+- Add the stat strip (Total + Pending fetched as additional unfiltered queries; Volume 24h + Active Advisors atmospheric — see "Stat strip data sourcing").
 - Polish the table (mono numerals, sparkline-in-amount-cell, hover glow with left cyan bar, sortable headers with arrow rotation, status pills with Pending pulse).
-- Polish pagination (page-turn motion between pages, mono labels).
-- Implement the detail view as a nested-overlay route — list stays mounted underneath, panel slides in from the right with backdrop fade and field stagger.
-- Implement every state treatment: loading (initial skeleton + refetch shimmer), error (rose banner), empty (with Clear Filters), detail 404.
+- Polish pagination (page-turn motion between pages, mono uppercase labels).
+- Implement every state treatment: loading (initial skeleton + refetch shimmer), error (rose banner), empty (with Clear Filters, already in place — restyles only), detail 404.
 - Implement the full motion system (ambient / reactive / triggered / panel categories) with reduced-motion fallbacks.
-- Extend Playwright coverage (motion wiring assertions, reduced-motion test, new filter / sort / detail tests).
+- Extend the Playwright suite: update selectors per the Test compatibility table, add stat-strip presence test, add `motion.spec.ts` for wiring + reduced-motion.
 
 ### Out of scope (explicit)
 
-- **AI chat drawer** (sub-project 3 — deferred). No reserved layout slot.
+- **AI chat drawer** (sub-project 3 — specced separately, not yet implemented). No reserved layout slot.
 - **Mobile / tablet responsive** — desktop-first, no specific support below 1024 px viewport.
 - **Light theme** — dark-only.
 - **Real-time WebSocket data** — the "LIVE" indicator and session ID are atmospheric only. The clock displays real wall-clock time via `setInterval`.
+- **New aggregate / summary endpoints on the backend** — stat strip uses the existing list endpoint with `pageSize=1` for the two real cards.
 - **Internationalization** — strings are English-only.
 - **Accessibility audit beyond keyboard support** — filters reachable by Tab, panel Esc-closable, ARIA labels on icon-only buttons. No screen-reader audit, no contrast audit beyond the obvious.
 - **Component-level test runner** (Vitest etc.) — primitives are exercised via Playwright.
@@ -112,52 +149,56 @@ Why this shape:
 - `<AnimatePresence>` lives around the `<Outlet />` in `_dashboard.tsx` so panel mount and unmount both animate.
 - Close handlers call `navigate({ to: '/', search: (prev) => prev })` to dismiss the panel while preserving filter state.
 
-### File layout (new + modified)
+### File layout
+
+Status markers: **NEW** = file does not exist · **REWRITE** = file exists, content fully replaced · **MODIFY** = small additions to existing file · **KEEP** = no changes · **MOVE** = file relocated.
 
 ```
 frontend/
-├── package.json                              # MODIFIED: + motion, + @fontsource/{inter, jetbrains-mono}
+├── package.json                              # MODIFY: + motion (v12, ~30 kB gz), + @fontsource/inter, + @fontsource/jetbrains-mono
 ├── src/
-│   ├── styles.css                            # REWRITTEN: @theme tokens, font @imports, base resets
-│   ├── components/                           # NEW directory
+│   ├── styles.css                            # REWRITE: @theme tokens, font @imports, base resets
+│   ├── components/
 │   │   ├── Header.tsx                        # NEW
-│   │   ├── ScanBeam.tsx                      # NEW (ambient line at top of root layout)
+│   │   ├── ScanBeam.tsx                      # NEW (ambient line at top of root)
 │   │   ├── StatStrip.tsx                     # NEW (4-card row)
 │   │   ├── StatCard.tsx                      # NEW
 │   │   ├── Counter.tsx                       # NEW (animated number)
-│   │   ├── FilterBar.tsx                     # NEW
+│   │   ├── FilterBar.tsx                     # REWRITE: native <select>s → chip groups + DateRangePill + SearchInput
 │   │   ├── Chip.tsx                          # NEW (filter chip; animated border when active)
-│   │   ├── SearchInput.tsx                   # NEW
+│   │   ├── SearchInput.tsx                   # NEW (extracted from FilterBar; mono input with ⌕ lead)
 │   │   ├── DateRangePill.tsx                 # NEW (popover with from / to inputs)
 │   │   ├── DataTable.tsx                     # NEW (grid layout, sortable headers)
 │   │   ├── DataRow.tsx                       # NEW (clickable row with hover glow)
 │   │   ├── Sparkline.tsx                     # NEW (SVG)
-│   │   ├── StatusPill.tsx                    # NEW (replaces sub-project 2's plain pill)
+│   │   ├── StatusPill.tsx                    # REWRITE: terminal-styled pill with pulsing Pending halo (keeps export name + Status prop)
 │   │   ├── TypeLabel.tsx                     # NEW
 │   │   ├── AmountCell.tsx                    # NEW (sparkline + tabular-nums amount + currency)
-│   │   ├── SkeletonRow.tsx                   # NEW (shimmer placeholder)
+│   │   ├── SkeletonRows.tsx                  # REWRITE: shimmer sweep instead of animate-pulse. Keeps filename, exported name, and `data-testid="skeleton-row"` so existing test selectors are unchanged.
 │   │   ├── PaginationBar.tsx                 # NEW
 │   │   ├── Button.tsx                        # NEW (ghost variant)
-│   │   ├── DetailPanel.tsx                   # NEW (slide-in container)
+│   │   ├── DetailPanel.tsx                   # NEW (slide-in container with backdrop + AnimatePresence)
 │   │   ├── DetailField.tsx                   # NEW (label + value pair)
 │   │   ├── EmptyState.tsx                    # NEW
 │   │   └── ErrorBanner.tsx                   # NEW
 │   ├── lib/
-│   │   ├── useDebouncedValue.ts              # NEW (per sub-project 2 spec)
-│   │   ├── useReducedMotion.ts               # NEW (thin wrapper over Framer's useReducedMotion + media query)
-│   │   ├── format.ts                         # NEW (Intl.NumberFormat for amounts, date formatting)
-│   │   └── queryClient.ts                    # unchanged
+│   │   ├── listSearch.ts                     # KEEP (Zod schema, DEFAULT_LIST_SEARCH, isAnyFilterActive)
+│   │   ├── useDebouncedValue.ts              # KEEP
+│   │   ├── useReducedMotion.ts               # NEW (Framer's useReducedMotion + a static fallback for SSR/early-mount)
+│   │   ├── format.ts                         # NEW (centralized Intl.NumberFormat — currently duplicated in routes/index.tsx and routes/transactions.$id.tsx)
+│   │   └── queryClient.ts                    # KEEP
 │   ├── api/
-│   │   ├── client.ts                         # unchanged
-│   │   └── transactions.ts                   # MODIFIED: full filter shape + fetchTransaction (per sub-project 2)
+│   │   ├── client.ts                         # KEEP
+│   │   └── transactions.ts                   # MODIFY: add fetchTransactionCount(filterParams) helper or reuse fetchTransactions + read total (stat strip data)
 │   └── routes/
-│       ├── __root.tsx                        # REWRITTEN: <Header> + <ScanBeam> + <main><Outlet /></main>
-│       ├── _dashboard.tsx                    # NEW: pathless layout — stat strip + filter bar
-│       │                                     #      + table + pagination + <AnimatePresence><Outlet /></AnimatePresence>
-│       │                                     #      Owns the URL search-param schema (validateSearch).
+│       ├── __root.tsx                        # REWRITE: <Header> + <ScanBeam> + <main><Outlet /></main>
+│       ├── _dashboard.tsx                    # NEW: pathless layout owning validateSearch, the list query,
+│       │                                     #      and rendering <StatStrip /> + <FilterBar /> + <DataTable />
+│       │                                     #      + <PaginationBar /> + <AnimatePresence><Outlet /></AnimatePresence>
 │       ├── _dashboard.index.tsx              # NEW: matches /, component returns null
 │       ├── _dashboard.transactions.$id.tsx   # NEW: renders <DetailPanel id={id} />
-│       └── index.tsx                         # DELETED: replaced by _dashboard.index.tsx
+│       ├── index.tsx                         # DELETE: superseded by _dashboard.index.tsx (logic moves into _dashboard.tsx)
+│       └── transactions.$id.tsx              # DELETE: superseded by _dashboard.transactions.$id.tsx
 └── e2e/
     ├── list.spec.ts                          # MODIFIED: keeps existing assertions; adds filter / sort / pill / motion-wiring tests
     ├── detail.spec.ts                        # NEW
@@ -271,7 +312,7 @@ Primitives are **flat, not nested.** Each is one file, one default export, one p
 | `AmountCell` | Wraps `Sparkline` + tabular-nums number + currency suffix; right-aligned to match right-aligned column header |
 | `StatusPill` | 3 variants. Pending pulses via `--dur-pulse` halo. |
 | `TypeLabel` | BUY / SELL / DIV / FEE / TRF colored mono labels |
-| `SkeletonRow` | 7-column shimmer placeholder used during loading |
+| `SkeletonRows` | Renders N shimmer placeholder `<tr>`s with C cells each (existing component, rewritten) |
 | `PaginationBar` | Prev / "PAGE n / m" / Next; the page number sits inside an `AnimatePresence` keyed on `page` for the page-turn motion |
 | `Button` | Ghost variant: transparent bg, line border, cyan hover glow |
 | `DetailPanel` | Right-edge fixed container; uses Framer `motion.aside` for slide + backdrop fade; close handlers (Esc, backdrop click, X button); contains a field grid + Notes section |
@@ -300,7 +341,7 @@ Every animation in the app, organized by trigger class.
 | Row hover | `DataRow:hover` | `--dur-quick` background fade + 2px left cyan bar appears (Framer layout animation) | background fade only, no bar |
 | Button hover | `Button:hover` | `--dur-quick` border swap to cyan + 3px outer cyan-glow ring | border swap only |
 | Pending pill pulse | `StatusPill[pending]` | `--dur-pulse` halo expansion (`box-shadow` from `0 0 0 0 amber` to `0 0 0 4px transparent`) | static |
-| Skeleton shimmer | `SkeletonRow` | `--dur-shimmer` linear background-position sweep | solid line |
+| Skeleton shimmer | `SkeletonRows` cells | `--dur-shimmer` linear background-position sweep | solid line |
 | Table refetch dim | `DataTable` while `isFetching` | Rows go to 60% opacity; 1px cyan progress sliver under filter bar | opacity change only |
 
 ### Triggered (one-time, on event)
@@ -375,7 +416,7 @@ The atmospheric values still flow through `<Counter />` so they animate from 0 t
 
 | State | Visual treatment |
 |---|---|
-| **Initial loading** | 8 `SkeletonRow`s in the table + 4 skeleton bars in the stat strip |
+| **Initial loading** | `<SkeletonRows count={8} columns={7} />` in the table + 4 skeleton bars in the stat strip |
 | **Refetch (filter change)** | Existing rows stay visible at 60 % opacity; 1 px cyan progress sliver under the filter bar (driven by TanStack Query `isFetching`) |
 | **Error** | `ErrorBanner` above the table: "Couldn't load transactions · Retry" — filter bar stays interactive |
 | **Empty** | Mono prompt "NO TRANSACTIONS MATCH THESE FILTERS" + ghost "Clear filters" `Button` (only when any filter param is non-default) |
@@ -384,23 +425,45 @@ The atmospheric values still flow through `<Counter />` so they animate from 0 t
 
 ## Testing strategy
 
-### Playwright extends the existing suite (no new test runner)
+### Test compatibility & migration
 
-**`list.spec.ts`** — keep all existing assertions (loading indicator, error retry, empty state, pagination disabled-state boundaries). Add:
+The 15 existing tests in `list.spec.ts` and 3 in `detail.spec.ts` were written against the sub-project 2 UI. Several selectors are tied to the native `<select>` filter bar, the pastel pill classes, and the "Back to list" link in the full-route detail page. The redesign breaks those selectors. The plan is to **update the tests as part of this work** (tests track UX; if UX changes, assertions change) — but only where strictly required.
 
-- Filter chip click updates URL and table contents (`type`, `status`).
-- Search debounce: type "AAPL", assert URL has no `search` at t=250ms, has `search=AAPL` at t=400ms.
-- Sort header click updates URL params and reorders rows (first row Amount higher under "Amount high to low").
-- Page-size selector changes rows-per-page and resets `page` to 1.
-- Status pill has expected mono text and color class on a Settled row.
-- Stat strip renders 4 cards; counters end at non-zero values after first paint.
+| Existing assertion | Today's selector | After redesign | Fix |
+|---|---|---|---|
+| Header title | `getByRole('heading', { name: 'LedgerOne' })` | `<Header />` shows `LEDGER//ONE` styled text | Update test to `getByRole('banner').getByText(/LEDGER\/\/ONE/)` OR add `aria-label="LedgerOne"` on the Header element so existing query passes |
+| Type filter | `getByLabel('Type').selectOption('Buy')` | Chip group: 6 buttons (`All`, `Buy`, …, `Dividend`) | `getByRole('button', { name: 'Buy', exact: true })` inside `getByLabel('Type')` (label-wrapped role-group), OR `page.locator('[data-testid="type-chip-Buy"]').click()` |
+| Status filter | `getByLabel('Status').selectOption('Pending')` | Chip group: 4 buttons | Same pattern as Type |
+| Sort | `getByLabel('Sort').selectOption('amount:desc')` | Click on `AMOUNT` table header (toggles `sortDir`) | `page.getByRole('columnheader', { name: 'AMOUNT' }).click()` (twice if needed to reach desc) |
+| Page size | `getByLabel('Page size').selectOption('50')` | Small mono `<select>` to the right of the page indicator (kept as `<select>` because chip-group for 3 options is overkill) | Selector unchanged ✔ |
+| From / To dates | `getByLabel('From')` / `getByLabel('To')` | `<DateRangePill />` popover with two native `<input type="date">` inside | After opening the pill, selector still finds the inputs by their `<label>` text — keep `From` / `To` labels inside the popover |
+| Search | `getByLabel('Search').fill('AAPL')` | `<SearchInput />` styled mono input | Keep `<label>Search</label>` wrapper — selector unchanged ✔ |
+| Skeleton row | `tbody tr[data-testid="skeleton-row"]` | New shimmer skeleton keeps the same `data-testid` | Unchanged ✔ |
+| Status pill class | `expect(pill).toHaveClass(/bg-(green\|yellow\|red)-100/)` | New pill uses `bg-emerald-…` / `bg-amber-…` / `bg-rose-…` Tailwind classes | Replace with `expect(pill).toHaveAttribute('data-status', /Settled\|Pending\|Cancelled/)` and have `StatusPill` carry that attribute. More robust than class-name matching. |
+| Pagination text | `getByText(/Page 2 of \d+/)` | Pagination still reads "PAGE 2 / 337" (uppercase, slash separator) | Update regex: `/PAGE\s+2\s*\/\s*\d+/i` |
+| Prev / Next | `getByRole('button', { name: 'Next' })` / `'Prev'` | `<PaginationBar />` uses `‹ PREV` and `NEXT ›` | Buttons keep accessible names `Prev` / `Next` via `aria-label`; visible text stays decorative |
+| Empty state | `getByText('No transactions')` / `'No transactions match these filters'` | New mono uppercase strings | Update to `/NO TRANSACTIONS/i` regex OR keep the exact mixed-case strings and let CSS uppercase them (`text-transform: uppercase`) — **chosen: CSS uppercase** so existing string assertions pass unchanged |
+| Empty state action | `getByRole('button', { name: 'Clear Filters' })` | `<Button>` keeps the text "Clear Filters" | Unchanged ✔ |
+| Error banner | `getByText("Couldn't load transactions")` | New rose banner keeps the same string | Unchanged ✔ |
+| Row click | `tbody tr[role="button"]` | `<DataRow />` keeps `role="button"` + `tabIndex={0}` + click + Enter handlers | Unchanged ✔ |
+| Back to list | `detail.spec.ts: getByRole('link', { name: /Back to list/ })` | Overlay panel has no "Back to list" link — close is via × button, Esc, or backdrop click | **Replace** with `page.keyboard.press('Escape')` or `page.getByRole('button', { name: 'Close' })` |
+| Detail page content | `detail.spec.ts: getByText('Account', { exact: true })` | Same field labels render inside the panel | Unchanged ✔ |
+| Detail 404 message | `getByText('Transaction not found')` | Same string (CSS-uppercased) | Unchanged ✔ |
+| "Return to the list" link | `getByRole('link', { name: 'Return to the list' })` | Panel still offers a return link on 404 | Unchanged ✔ |
 
-**`detail.spec.ts`** — new file:
+Pattern: where the redesign is purely visual (uppercase, color), use **CSS to preserve the underlying DOM text** so existing string-based selectors don't break. Where the redesign is structural (chips for selects, header-click sort, overlay panel), update test selectors and add stable `data-*` hooks (`data-testid`, `data-status`, `data-motion-id`, `data-motion-state`) so tests don't reach into styling concerns.
 
-- Click first table row → URL becomes `/transactions/<id>`, detail panel renders all labelled fields.
-- Esc closes panel → URL returns to `/` with filters preserved.
-- Backdrop click closes panel similarly.
-- Visit `/transactions/999999` directly → panel mounts, shows "TRANSACTION NOT FOUND".
+### Playwright tests after the redesign
+
+**`list.spec.ts`** — keep all 15 existing tests with the targeted selector updates above. Additionally:
+
+- Stat strip renders 4 cards; the two real-data counters end at non-zero values after first paint (Total ≥ 60 because the fixture seeds 60 rows; Pending ≥ 1).
+
+**`detail.spec.ts`** — keep the 3 existing tests with selector updates for panel close (Esc / close button) instead of "Back to list" link. Add:
+
+- Esc closes the panel and URL returns to `/` with filters preserved.
+- Backdrop click closes the panel.
+- After close, the list is still visible underneath (proves the list never unmounted).
 
 **`motion.spec.ts`** — new file. Motion assertions are **wiring-only, not pixel-perfect**:
 
@@ -429,24 +492,34 @@ No changes. Sub-project 2 backend coverage is already in place via existing xUni
 
 ## Build order (seed for writing-plans)
 
-This is the implementation flight path. Writing-plans will refine each step into atomic tasks with tests.
+The starting state is the fully-functional sub-project 2 implementation (commits `fbb0eea` → `3ce3b39`). Every step below preserves the green test suite — broken tests get their selectors updated *in the same commit* as the UI change that breaks them (per the Test compatibility table above). Writing-plans will refine each step into atomic tasks.
 
-1. **Deps**: add `motion`, `@fontsource/inter`, `@fontsource/jetbrains-mono`; commit lockfile.
-2. **Tokens**: rewrite `src/styles.css` with `@theme` block; import fonts; set body background, color, font defaults. Verify dev server boots and the existing list page picks up the new colors (will look wrong — that's expected).
-3. **Root layout**: rewrite `routes/__root.tsx` with `<Header />` and `<ScanBeam />`. Header gets logo, LIVE indicator, session ID (decorative), live clock via `setInterval`.
-4. **Pathless layout migration**: replace `routes/index.tsx` with `routes/_dashboard.tsx` (pathless layout owning `validateSearch`, the existing list query, and an `<AnimatePresence><Outlet /></AnimatePresence>` slot) plus `routes/_dashboard.index.tsx` (returns `null`). Existing tests stay green — URL contract unchanged.
-5. **Primitives**: build `Button`, `Chip`, `StatusPill`, `TypeLabel`, `SkeletonRow`, `EmptyState`, `ErrorBanner` — each in isolation against current/stub data.
-6. **Counter + StatCard + StatStrip**: animated number with `requestAnimationFrame`; one Playwright assertion that counters reach target. Wire Total + Pending to additional unfiltered/`status=Pending` queries; Volume + Advisors render hardcoded atmospheric values.
-7. **Table primitives**: `DataTable`, `DataRow`, `AmountCell`, `Sparkline`. Wire up to existing data. Polish hover state. Sortable headers (sort change → URL).
-8. **PaginationBar with page-turn motion**: `AnimatePresence` keyed on page; mono labels.
-9. **FilterBar**: `Chip` group for type, then status. Wire to URL via the `_dashboard.tsx` `validateSearch`. Reset `page` on change. Playwright tests for filter behaviors.
-10. **DateRangePill**: popover with native date inputs.
-11. **SearchInput + useDebouncedValue**: debounced search wired to URL. Playwright test for timing.
-12. **States**: empty state with Clear Filters, error banner, refetch dim + progress sliver.
-13. **Detail panel route** (`_dashboard.transactions.$id.tsx`): panel container with slide + backdrop + Esc / backdrop-click / button close. `DetailField` grid + Notes section. 404 path.
-14. **Detail row click handler**: `DataRow` onClick navigates to `/transactions/$id` with preserved search.
-15. **Reduced-motion sweep**: confirm every animated primitive honors `useReducedMotion`; add `motion.spec.ts`.
-16. **`make check` cleanup**: lint, format, tsc, dotnet format, all tests green. Final commit closes the spec.
+1. **Deps**: add `motion` (v12), `@fontsource/inter`, `@fontsource/jetbrains-mono`; commit lockfile.
+2. **Tokens & fonts**: rewrite `src/styles.css` with `@theme` block + `@import "@fontsource/inter"` + `@import "@fontsource/jetbrains-mono"` + body background / text-color / font-family defaults. Dev server boots; existing list looks broken (light-on-light) but tests still pass against the DOM.
+3. **Foundational reskin primitives** (in isolation, against stub data):
+   1. **StatusPill rewrite**: terminal-styled green / amber / rose pills with pulsing-halo Pending. Adds `data-status` attribute. Update the one existing pill test to `expect(pill).toHaveAttribute('data-status', ...)` in the same commit.
+   2. **SkeletonRows rewrite**: keep the existing filename, exported name, and `(count, columns)` API. Replace `animate-pulse bg-gray-200` cell content with the shimmer sweep. Preserves `data-testid="skeleton-row"` so no test changes.
+   3. **Button**, **EmptyState**, **ErrorBanner**, **TypeLabel** — new primitives, no test impact yet.
+4. **Header + ScanBeam, then rewrite `__root.tsx`**: Header renders logo (with blinking dot), LIVE indicator, session ID (decorative), live clock via `setInterval`. ScanBeam is the 1 px cyan sweep at the top. Add `aria-label="LedgerOne"` (or keep accessible text) so the existing `getByRole('heading', { name: 'LedgerOne' })` test passes — or update the test to `getByRole('banner').getByText(/LEDGER\/\/ONE/)` in the same commit.
+5. **Counter + StatCard + StatStrip**: animated number with `requestAnimationFrame`. Wire Total + Pending to additional `fetchTransactions({ page: 1, pageSize: 1, ... })` queries (one unfiltered for Total, one with `status: 'Pending'` for Pending). Volume + Advisors render hardcoded atmospheric values. Add one new Playwright assertion: 4 cards present, real counters end at non-zero.
+6. **Table primitives**: `DataTable` (grid layout with sortable header — clicking the `DATE` or `AMOUNT` header navigates to update `sortBy` / `sortDir`), `DataRow` (hover glow + Framer layout animation on the left bar), `AmountCell` (uses `lib/format.ts`), `Sparkline` (SVG draw-in). Update the Sort test from `getByLabel('Sort').selectOption('amount:desc')` to `page.getByRole('columnheader', { name: 'AMOUNT' }).click()` in the same commit.
+7. **PaginationBar with page-turn motion**: `AnimatePresence` keyed on page. Visible text uses `‹ PREV` / `NEXT ›` but `aria-label`s stay `Prev` / `Next`. "Page X of Y" becomes "PAGE X / Y" — update the regex in tests in the same commit.
+8. **FilterBar rewrite** (the structural one):
+   1. **Type chip group**: replaces native `<select>`. Wrap chips in `<fieldset>` with `<legend>Type</legend>` so the `getByLabel('Type')` query still anchors. Add `data-testid="type-chip-{name}"` on each chip. Update the Type test selector in the same commit.
+   2. **Status chip group**: same pattern.
+   3. **DateRangePill**: popover trigger button + popover with two `<input type="date">` carrying `From` and `To` labels (preserves the date label selectors).
+   4. **SearchInput**: extract from existing FilterBar; keeps `<label>Search</label>` (selector unchanged).
+   5. **Page size**: keep the existing native `<select>` (chip group is overkill for 3 options); preserves the `getByLabel('Page size')` selector.
+   6. **Remove the old Sort dropdown** — sorting moves to header clicks (step 6).
+9. **Pathless layout migration**: create `routes/_dashboard.tsx` (pathless layout owning `validateSearch` and the list query) + `routes/_dashboard.index.tsx` (returns `null`). Move the list-rendering logic from `routes/index.tsx` into `_dashboard.tsx`. The dashboard layout renders `<StatStrip />` + `<FilterBar />` + `<DataTable />` + `<PaginationBar />` + `<AnimatePresence><Outlet /></AnimatePresence>`. Delete `routes/index.tsx`. URL contract unchanged; existing tests for the list page still pass.
+10. **States polish**: error banner styling (rose-bordered), refetch dim (`isFetching` → 60 % opacity on rows + 1 px progress sliver under the filter bar), empty-state mono text with CSS uppercase (preserves underlying "No transactions match these filters" string for existing tests).
+11. **Detail panel route**:
+    1. Create `routes/_dashboard.transactions.$id.tsx` with `<DetailPanel id={id} />` — fixed-position, slide-in via Framer Motion, backdrop + close on Esc / backdrop click / × button. `DetailField` grid + Notes section. 404 path renders "TRANSACTION NOT FOUND" inside the panel.
+    2. Delete the old `routes/transactions.$id.tsx`.
+    3. Update `detail.spec.ts`: replace the "Back to list" link query with `page.keyboard.press('Escape')` for one test and `getByRole('button', { name: 'Close' })` for another. Add a new test asserting the list is still visible underneath the panel.
+12. **format.ts centralization**: extract the duplicated `Intl.NumberFormat('en-CA', ...)` call from the now-deleted index/detail routes into `lib/format.ts`; `AmountCell` and `DetailField` both import from it.
+13. **Reduced-motion sweep**: confirm every animated primitive honors `useReducedMotion()` (Framer + media query). Add `motion.spec.ts` with the wiring assertions and the `reducedMotion: 'reduce'` pass.
+14. **`make check` cleanup**: lint, prettier, `tsc --noEmit`, `dotnet format` (no-op for this work), all Playwright tests green. Final commit closes the spec.
 
 ## Open items (still deferred)
 
