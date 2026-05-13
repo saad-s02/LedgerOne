@@ -5,6 +5,7 @@ import { listSearchSchema, DEFAULT_LIST_SEARCH, isAnyFilterActive } from '../lib
 import { StatusPill } from '../components/StatusPill';
 import { SkeletonRows } from '../components/SkeletonRows';
 import { FilterBar } from '../components/FilterBar';
+import { ChatDrawer } from '../components/chat/ChatDrawer';
 
 export const Route = createFileRoute('/')({
   validateSearch: listSearchSchema.parse,
@@ -22,6 +23,10 @@ function ListPage() {
 
   return (
     <div>
+      <div className="mb-3 flex items-center justify-between" data-testid="list-header">
+        <h1 className="text-lg font-semibold">Transactions</h1>
+        <ChatDrawer />
+      </div>
       <FilterBar
         value={search}
         onChange={(next) =>
