@@ -47,7 +47,7 @@ function ListPage() {
                 <th className="px-3 py-2">Advisor</th>
                 <th className="px-3 py-2">Type</th>
                 <th className="px-3 py-2">Symbol</th>
-                <th className="px-3 py-2">Amount</th>
+                <th className="px-3 py-2 text-right">Amount</th>
                 <th className="px-3 py-2">Status</th>
               </tr>
             </thead>
@@ -62,8 +62,12 @@ function ListPage() {
                     <td className="px-3 py-2">{t.advisorName}</td>
                     <td className="px-3 py-2">{t.type}</td>
                     <td className="px-3 py-2">{t.securitySymbol ?? '—'}</td>
-                    <td className="px-3 py-2">
-                      {t.amount.toFixed(2)} {t.currency}
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {new Intl.NumberFormat('en-CA', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }).format(t.amount)}{' '}
+                      {t.currency}
                     </td>
                     <td className="px-3 py-2">
                       <StatusPill status={t.status} />
