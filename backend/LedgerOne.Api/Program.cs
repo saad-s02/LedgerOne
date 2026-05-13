@@ -1,10 +1,18 @@
 using LedgerOne.Api.Controllers;
 using LedgerOne.Api.Data;
+using LedgerOne.Api.Infrastructure.Logging;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}"));
 
 var mvc = builder.Services.AddControllers().AddJsonOptions(opts =>
 {
@@ -25,6 +33,7 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
 
 var app = builder.Build();
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())

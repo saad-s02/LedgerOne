@@ -53,4 +53,26 @@ public class ProblemDetailsTests(ApiFactory factory) : IClassFixture<ApiFactory>
         var statusStr = body["status"].ToString() ?? "";
         statusStr.Should().Be("500");
     }
+
+    [Fact]
+    public async Task Response_IncludesXCorrelationIdHeader()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync("/health", ct);
+        response.Headers.Contains("X-Correlation-Id").Should().BeTrue();
+        var value = response.Headers.GetValues("X-Correlation-Id").First();
+        value.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task Response_EchoesIncomingXCorrelationIdHeader()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        var req = new HttpRequestMessage(HttpMethod.Get, "/health");
+        req.Headers.Add("X-Correlation-Id", "test-correlation-123");
+        var response = await client.SendAsync(req, ct);
+        response.Headers.GetValues("X-Correlation-Id").Should().ContainSingle("test-correlation-123");
+    }
 }
