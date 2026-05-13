@@ -21,4 +21,12 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    files: ['src/routes/**/*.tsx'],
+    rules: {
+      // TanStack Router file routes export `Route` (a factory) alongside the
+      // component; treat it as an HOC so react-refresh stays happy.
+      'react-refresh/only-export-components': ['warn', { allowExportNames: ['Route'] }],
+    },
+  },
 ]);
