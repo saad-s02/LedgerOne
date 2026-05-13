@@ -204,4 +204,25 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
         var body = await response.Content.ReadAsStringAsync(ct);
         body.Should().Contain("amountRange");
     }
+
+    [Fact]
+    public async Task Get_Transactions_SearchMatchesAdvisorName()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        // Pull one row to discover an advisor name in the fixture
+        var list = await client.GetFromJsonAsync<ListTransactionsResponse>(
+            "/api/transactions?page=1&pageSize=1", JsonOptions, ct);
+        list.Should().NotBeNull();
+        var advisor = list!.Data.Single().AdvisorName;
+        var firstWord = advisor.Split(' ')[0];
+
+        var envelope = await client.GetFromJsonAsync<ListTransactionsResponse>(
+            $"/api/transactions?search={Uri.EscapeDataString(firstWord)}", JsonOptions, ct);
+        envelope.Should().NotBeNull();
+        envelope!.Data.Should().NotBeEmpty();
+        envelope.Data.Should().OnlyContain(t => t.AdvisorName.Contains(firstWord, StringComparison.OrdinalIgnoreCase));
+    }
 }

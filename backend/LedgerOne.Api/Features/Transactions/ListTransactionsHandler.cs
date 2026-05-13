@@ -58,7 +58,8 @@ public class ListTransactionsHandler(
             var pattern = $"%{req.Search.Trim()}%";
             query = query.Where(t =>
                 EF.Functions.Like(t.AccountId, pattern) ||
-                (t.SecuritySymbol != null && EF.Functions.Like(t.SecuritySymbol, pattern)));
+                (t.SecuritySymbol != null && EF.Functions.Like(t.SecuritySymbol, pattern)) ||
+                EF.Functions.Like(t.AdvisorName, pattern));
         }
 
         return query;
