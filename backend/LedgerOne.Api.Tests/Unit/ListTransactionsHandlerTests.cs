@@ -20,7 +20,7 @@ public class ListTransactionsHandlerTests : IDisposable
         var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_conn).Options;
         _db = new AppDbContext(options);
         _db.Database.EnsureCreated();
-        _sut = new ListTransactionsHandler(_db);
+        _sut = new ListTransactionsHandler(_db, new ListTransactionsValidator());
     }
 
     public void Dispose()
