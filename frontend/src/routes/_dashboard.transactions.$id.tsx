@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTransaction, transactionDetailKey } from '../api/transactions';
 import { ApiError } from '../api/client';
+import type { ListSearch } from '../lib/listSearch';
 import { DetailSheet } from '../components/DetailSheet';
 import { DetailField } from '../components/DetailField';
 import { StatusPill } from '../components/StatusPill';
@@ -19,7 +20,7 @@ function DetailRoute() {
   const navigate = useNavigate();
   const numericId = Number(id);
 
-  const close = () => navigate({ to: '/', search: (prev) => prev });
+  const close = () => navigate({ to: '/', search: (prev) => prev as ListSearch });
 
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: transactionDetailKey(numericId),

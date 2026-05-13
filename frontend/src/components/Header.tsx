@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
+import { DEFAULT_LIST_SEARCH } from '../lib/listSearch';
 
 function useLiveClock() {
   const [now, setNow] = useState(() => new Date());
@@ -42,6 +43,7 @@ export function Header() {
           <nav className="flex items-center gap-1">
             <Link
               to="/"
+              search={DEFAULT_LIST_SEARCH}
               activeOptions={{ exact: true }}
               activeProps={{ className: `${NAV_BASE} ${NAV_ACTIVE}` }}
               inactiveProps={{ className: `${NAV_BASE} ${NAV_INACTIVE}` }}

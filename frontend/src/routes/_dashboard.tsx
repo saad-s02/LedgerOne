@@ -1,7 +1,12 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTransactions, transactionsKey } from '../api/transactions';
-import { listSearchSchema, DEFAULT_LIST_SEARCH, isAnyFilterActive } from '../lib/listSearch';
+import {
+  listSearchSchema,
+  DEFAULT_LIST_SEARCH,
+  isAnyFilterActive,
+  type ListSearch,
+} from '../lib/listSearch';
 import { FilterBar } from '../components/FilterBar';
 import { SkeletonRows } from '../components/SkeletonRows';
 import { StatStrip } from '../components/StatStrip';
@@ -32,13 +37,13 @@ function DashboardLayout() {
   });
 
   const onFilterChange = (next: Partial<typeof search>) =>
-    navigate({ to: '/', search: (prev) => ({ ...prev, ...next, page: 1 }) });
+    navigate({ to: '/', search: (prev) => ({ ...(prev as ListSearch), ...next, page: 1 }) });
 
   const onSortChange = (next: { sortBy: typeof search.sortBy; sortDir: typeof search.sortDir }) =>
-    navigate({ to: '/', search: (prev) => ({ ...prev, ...next }) });
+    navigate({ to: '/', search: (prev) => ({ ...(prev as ListSearch), ...next }) });
 
   const onPageChange = (nextPage: number) =>
-    navigate({ to: '/', search: (prev) => ({ ...prev, page: nextPage }) });
+    navigate({ to: '/', search: (prev) => ({ ...(prev as ListSearch), page: nextPage }) });
 
   return (
     <div>
