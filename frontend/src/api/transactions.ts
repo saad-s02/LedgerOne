@@ -39,6 +39,8 @@ export interface ListTransactionsParams {
   type?: TransactionType;
   status?: TransactionStatus;
   search?: string;
+  minAmount?: number;
+  maxAmount?: number;
   sortBy: SortField;
   sortDir: SortDirection;
 }
@@ -65,6 +67,8 @@ export function fetchTransactions(
   if (params.type) qs.set('type', params.type);
   if (params.status) qs.set('status', params.status);
   if (params.search) qs.set('search', params.search);
+  if (params.minAmount !== undefined) qs.set('minAmount', String(params.minAmount));
+  if (params.maxAmount !== undefined) qs.set('maxAmount', String(params.maxAmount));
   return apiGet<ListTransactionsResponse>(`/api/transactions?${qs}`, signal);
 }
 

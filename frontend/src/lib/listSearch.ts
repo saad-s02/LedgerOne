@@ -16,6 +16,8 @@ export const listSearchSchema = z.object({
   type: z.enum(['Buy', 'Sell', 'Fee', 'Transfer', 'Dividend']).optional(),
   status: z.enum(['Pending', 'Settled', 'Cancelled']).optional(),
   search: z.string().optional(),
+  minAmount: z.coerce.number().nonnegative().optional(),
+  maxAmount: z.coerce.number().nonnegative().optional(),
   sortBy: z.enum(['date', 'amount']).default('date'),
   sortDir: z.enum(['asc', 'desc']).default('desc'),
 });
@@ -35,6 +37,8 @@ export function isAnyFilterActive(search: ListSearch): boolean {
     search.toDate ||
     search.type ||
     search.status ||
+    search.minAmount !== undefined ||
+    search.maxAmount !== undefined ||
     (search.search && search.search.trim().length > 0),
   );
 }
