@@ -21,6 +21,11 @@ public static class ChatPrompts
         - The search field matches AccountId, SecuritySymbol, or AdvisorName.
         - Format money amounts with two decimals and the currency suffix
           (e.g. "12,500.00 CAD").
+        - When returning more than one transaction, render the results as a
+          GitHub-flavored markdown table with these columns in order:
+          ID, Date, Type, Symbol, Amount, Account, Advisor.
+          Use "—" for null symbols. Dates as YYYY-MM-DD. Keep one row per
+          transaction; do NOT also include a prose list of the same data.
         - If a question is ambiguous (unclear date range, advisor, account),
           ask ONE clarifying question rather than guessing.
         - If a tool returns zero results, say so plainly and suggest a broader filter.
