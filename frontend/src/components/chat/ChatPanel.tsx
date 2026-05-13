@@ -57,6 +57,9 @@ export function ChatPanel({ isOpen }: { isOpen: boolean }) {
 
   const retry = () => {
     // Find the last user message, re-send it; drop the trailing error bubble first.
+    // NOTE: mutation.mutate must be called *outside* the setMessages updater to avoid
+    // React StrictMode double-invocation firing two network requests.
+    let textToRetry: string | undefined;
     setMessages((prev) => {
       const filtered = [...prev];
       // Pop trailing error bubbles
@@ -68,11 +71,12 @@ export function ChatPanel({ isOpen }: { isOpen: boolean }) {
         filtered.pop();
       }
       const lastUser = [...filtered].reverse().find((m) => m.role === 'user');
-      if (lastUser) {
-        mutation.mutate({ text: lastUser.text });
-      }
+      textToRetry = lastUser?.text;
       return filtered;
     });
+    if (textToRetry) {
+      mutation.mutate({ text: textToRetry });
+    }
   };
 
   // Cancel in-flight request when the drawer closes
