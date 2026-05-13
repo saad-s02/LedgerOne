@@ -1,3 +1,4 @@
+using FluentValidation;
 using LedgerOne.Api.Data;
 using LedgerOne.Api.Data.Seeding;
 using LedgerOne.Api.Infrastructure.Logging;
@@ -39,6 +40,7 @@ if (allowedOrigins.Length > 0)
 }
 
 builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.ListTransactionsHandler>();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddDbContext<AppDbContext>(opts =>
 {
