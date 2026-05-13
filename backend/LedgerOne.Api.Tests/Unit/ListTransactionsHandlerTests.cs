@@ -266,4 +266,22 @@ public class ListTransactionsHandlerTests : IDisposable
         response.Total.Should().Be(2);
         response.Data.Select(d => d.Type).Should().AllSatisfy(t => t.Should().Be(TransactionType.Buy));
     }
+
+    [Fact]
+    public async Task Handle_FilterByStatus_ReturnsOnlyMatchingRows()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "A", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Pending,   CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "B", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,   CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "C", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Pending,   CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { Status = TransactionStatus.Pending },
+            ct);
+
+        response.Total.Should().Be(2);
+        response.Data.Select(d => d.Status).Should().AllSatisfy(s => s.Should().Be(TransactionStatus.Pending));
+    }
 }

@@ -48,6 +48,22 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task Get_Transactions_FilterByStatus_ReturnsOnlyMatchingRows()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        var response = await client.GetAsync("/api/transactions?status=Pending", ct);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var envelope = await response.Content.ReadFromJsonAsync<ListTransactionsResponse>(JsonOptions, ct);
+        envelope.Should().NotBeNull();
+        envelope!.Total.Should().Be(20);
+        envelope.Data.Should().AllSatisfy(d => d.Status.Should().Be(LedgerOne.Api.Domain.TransactionStatus.Pending));
+    }
+
+    [Fact]
     public async Task Get_Transactions_FilterByType_ReturnsOnlyMatchingRows()
     {
         var ct = TestContext.Current.CancellationToken;
