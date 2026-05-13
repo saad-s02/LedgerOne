@@ -48,6 +48,22 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task Get_Transactions_SearchByAccountId_ReturnsMatchingRows()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        var response = await client.GetAsync("/api/transactions?search=ACCT-00001", ct);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var envelope = await response.Content.ReadFromJsonAsync<ListTransactionsResponse>(JsonOptions, ct);
+        envelope.Should().NotBeNull();
+        envelope!.Data.Should().NotBeEmpty();
+        envelope.Data.Should().AllSatisfy(d => d.AccountId.Should().Contain("ACCT-00001"));
+    }
+
+    [Fact]
     public async Task Get_Transactions_FromDateAfterToDate_Returns400ProblemDetails()
     {
         var ct = TestContext.Current.CancellationToken;

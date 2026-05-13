@@ -334,4 +334,54 @@ public class ListTransactionsHandlerTests : IDisposable
         var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
         ex.Which.Errors.Should().ContainKey("dateRange");
     }
+
+    [Fact]
+    public async Task Handle_FilterBySearch_MatchesAccountIdSubstring_CaseInsensitive()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "ACCT-12345", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "ACCT-99999", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { Search = "acct-12" },
+            ct);
+
+        response.Total.Should().Be(1);
+        response.Data.Single().AccountId.Should().Be("ACCT-12345");
+    }
+
+    [Fact]
+    public async Task Handle_FilterBySearch_MatchesSecuritySymbolSubstring()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "X", AdvisorName = "x", Type = TransactionType.Buy, SecuritySymbol = "AAPL", Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "Y", AdvisorName = "x", Type = TransactionType.Buy, SecuritySymbol = "MSFT", Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { Search = "AAPL" },
+            ct);
+
+        response.Total.Should().Be(1);
+        response.Data.Single().SecuritySymbol.Should().Be("AAPL");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public async Task Handle_FilterBySearch_EmptyOrWhitespace_TreatedAsNoFilter(string? search)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(5);
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { Search = search },
+            ct);
+
+        response.Total.Should().Be(5);
+    }
 }

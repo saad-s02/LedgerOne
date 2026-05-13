@@ -50,6 +50,15 @@ public class ListTransactionsHandler(
         if (req.Status.HasValue)   query = query.Where(t => t.Status == req.Status.Value);
         if (req.FromDate.HasValue) query = query.Where(t => t.TransactionDate >= req.FromDate.Value);
         if (req.ToDate.HasValue)   query = query.Where(t => t.TransactionDate <= req.ToDate.Value);
+
+        if (!string.IsNullOrWhiteSpace(req.Search))
+        {
+            var pattern = $"%{req.Search.Trim()}%";
+            query = query.Where(t =>
+                EF.Functions.Like(t.AccountId, pattern) ||
+                (t.SecuritySymbol != null && EF.Functions.Like(t.SecuritySymbol, pattern)));
+        }
+
         return query;
     }
 }
