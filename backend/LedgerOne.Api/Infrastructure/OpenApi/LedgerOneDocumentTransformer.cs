@@ -14,11 +14,10 @@ internal sealed class LedgerOneDocumentTransformer(IHostEnvironment env) : IOpen
     private const string Description = """
         REST API for the LedgerOne investment transactions dashboard.
 
-        Built as a PriceMetrix take-home to demonstrate clean API design on the
-        .NET stack: thin controllers + feature handlers, EF Core with explicit
-        indexes, RFC 7807 problem details on every error path, structured
-        Serilog logging with per-request correlation IDs, and an honest
-        OpenAPI surface generated directly from the code that serves it.
+        Designed around thin controllers + feature handlers, EF Core with
+        explicit indexes, RFC 7807 problem details on every error path,
+        structured Serilog logging with per-request correlation IDs, and an
+        honest OpenAPI surface generated directly from the code that serves it.
 
         The frontend at /docs renders this spec alongside the design decisions,
         scale considerations, and observability story that informed each
@@ -61,7 +60,7 @@ internal sealed class LedgerOneDocumentTransformer(IHostEnvironment env) : IOpen
             new OpenApiTag
             {
                 Name = "Chat",
-                Description = "Natural-language agent layer. Scaffolded but returns 501 until sub-project 3 lands the ReAct loop and tool implementations.",
+                Description = "Natural-language agent layer. Backed by Claude Haiku 4.5 running a ReAct loop (max 5 iterations, 60s deadline) over read-only search_transactions and get_transaction tools that share the same handlers as the REST endpoints.",
             },
             new OpenApiTag
             {

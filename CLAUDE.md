@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-LedgerOne is an investment-transactions dashboard (PriceMetrix take-home). The work is decomposed into three sub-projects:
+LedgerOne is an investment-transactions dashboard. The implementation covers three layers, all landed on this branch:
 
-1. **This branch** — scaffolds + paginated list view (no filters, no detail).
-2. **Deferred** — filters, sort, detail view, status pills, debouncing.
-3. **Deferred** — AI agent layer (chat endpoint, tools, ReAct loop).
+1. **Foundation** — data model, migrations, seeding, paginated list endpoint and view.
+2. **Query UX** — filters, sort, detail view, status pills, debounced search, URL-driven state.
+3. **AI agent** — `/api/chat` endpoint, read-only tools over the existing handlers, manual ReAct loop.
 
-`PRD.md` is the product spec. `docs/superpowers/specs/` and `docs/superpowers/plans/` hold the design and the implementation plan that produced the current code; consult them before extending the architecture so changes stay consistent with the deferred sub-projects.
+`PRD.md` is the product spec. `docs/superpowers/specs/` and `docs/superpowers/plans/` hold the design and the implementation plan that produced the current code; consult them before extending the architecture so changes stay consistent with the established patterns.
 
 ## Commands
 
@@ -42,7 +42,7 @@ Playwright spins up **both** the backend (in `Testing` env on :5000) and the Vit
 ### Backend (`backend/LedgerOne.Api`)
 
 - **.NET 10, ASP.NET Core (controllers), EF Core + SQLite, Serilog.** `TreatWarningsAsErrors=true` is set via `Directory.Build.props`; new warnings break the build.
-- **Handler pattern.** Controllers are deliberately thin pass-throughs (see `Controllers/TransactionsController.cs`). The real work — query, DTO projection, validation — lives in feature handlers (e.g. `Features/Transactions/ListTransactionsHandler.cs`). This shape exists so the deferred AI-agent sub-project can call handlers directly as tools without going through HTTP. **When adding a feature, put logic in a handler, not the controller.**
+- **Handler pattern.** Controllers are deliberately thin pass-throughs (see `Controllers/TransactionsController.cs`). The real work — query, DTO projection, validation — lives in feature handlers (e.g. `Features/Transactions/ListTransactionsHandler.cs`). This shape exists so the AI agent's tool layer can call handlers directly without going through HTTP (see `Features/Chat/TransactionTools.cs`). **When adding a feature, put logic in a handler, not the controller.**
 - **Problem Details everywhere.** Errors flow through `Infrastructure/ProblemDetails/GlobalExceptionHandler.cs` and `AddProblemDetails()`. Validation errors come from `Infrastructure/Validation/ValidationException.cs`. Every response carries `X-Correlation-Id` (via `Infrastructure/Logging/CorrelationIdMiddleware.cs`) and the same id appears as `traceId` in problem-details bodies and in Serilog scope.
 - **Three environments**, each with its own DB and behavior in `Program.cs`:
   - `Development` — applies migrations, seeds 8k Bogus rows into `ledgerone.db` if empty, enables CORS for `localhost:5173`.

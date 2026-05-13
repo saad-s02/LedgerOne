@@ -7,11 +7,20 @@ export interface DesignNote {
   references: DecisionId[];
 }
 
+export interface TryItExample {
+  /** Query / path parameter values, keyed by parameter name. */
+  parameters?: Record<string, string>;
+  /** Realistic request body. Stringified into the textarea. */
+  requestBody?: unknown;
+}
+
 export interface Overlay {
   /** Editorial sidebar shown on each endpoint card, keyed by operationId. */
   designNotes: Record<string, DesignNote>;
   /** Override the implementation status badge for an operationId. Defaults to "live". */
   statusOverride: Record<string, ImplementationStatus>;
+  /** Prefilled "Try it" inputs, keyed by operationId. Falls back to schema defaults. */
+  tryItExamples: Record<string, TryItExample>;
 }
 
 export const OVERLAY: Overlay = {
@@ -28,7 +37,7 @@ export const OVERLAY: Overlay = {
     },
     Chat_Post: {
       summary:
-        'Design preview. Contract is locked, validation pipeline is wired, but the ReAct loop and tool implementations ship in sub-project 3. Today every request returns 501.',
+        'Claude Haiku 4.5 runs a ReAct loop (max 5 iterations, 60s deadline) over read-only search_transactions / get_transaction tools that share the REST handlers. Missing API key surfaces as 503, upstream failure as 502, deadline overrun as 504.',
       references: ['rest-tools-vs-db', 'no-multi-tenant'],
     },
     Test_Seed: {
@@ -52,9 +61,28 @@ export const OVERLAY: Overlay = {
     },
   },
   statusOverride: {
-    Chat_Post: 'preview',
     Test_Seed: 'testing-only',
     Test_Clear: 'testing-only',
     Test_Boom: 'testing-only',
+  },
+  tryItExamples: {
+    Transactions_List: {
+      parameters: {
+        page: '1',
+        pageSize: '25',
+        search: 'Sarah',
+        status: 'Pending',
+        type: 'Buy',
+      },
+    },
+    Transactions_Get: {
+      parameters: { id: '1' },
+    },
+    Chat_Post: {
+      requestBody: {
+        message: 'Show me all pending Buy transactions from Sarah Chen in the last 30 days.',
+        conversationHistory: [],
+      },
+    },
   },
 };

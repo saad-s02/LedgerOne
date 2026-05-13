@@ -1,10 +1,10 @@
 # LedgerOne — Investment Transactions Dashboard
 
-PriceMetrix take-home built on the React + .NET + SQL stack. See `PRD.md` for the
-product spec and `docs/superpowers/specs/` for the implementation design.
-
-Sub-projects 1 (paginated list), 2 (filters, detail view), and 3 (AI agent) are
-all implemented on this branch.
+An investment-transactions dashboard built on the React + .NET + SQL stack:
+paginated list with filters and sort, transaction detail view, and a
+chat-driven AI agent that queries the same data through the dashboard's REST
+API. See `PRD.md` for the product spec and `docs/superpowers/specs/` for the
+implementation design.
 
 ## Stack
 
@@ -50,8 +50,8 @@ Tests run in TDD discipline: every behavior has a failing test first.
 ## Architecture notes
 
 - **Handler pattern.** Controllers are thin; `ListTransactionsHandler` owns the
-  query, DTO projection, and validation. The handler is callable directly by the
-  AI agent's tool layer in sub-project 3 without HTTP overhead.
+  query, DTO projection, and validation. The handler is also callable directly
+  by the AI agent's tool layer without HTTP overhead.
 - **Problem Details everywhere.** Errors return RFC 7807 with `traceId` extension
   for correlation; the same trace ID is also echoed in the `X-Correlation-Id` response header.
 - **Real migrations** (not `EnsureCreated`) so the schema is reproducible. EF
@@ -103,13 +103,13 @@ Three well-described tools over a tabular dataset is exactly the structured tool
 - Evaluation harness for query accuracy.
 - Cost / token observability dashboard.
 
-## Scope notes
+## Implementation notes
 
-Built as a decomposed implementation plan across three sub-projects (all on this branch):
+The dashboard ships in three layers, all on this branch:
 
-- **Sub-project 1:** scaffolds, data model, paginated list (no filters).
-- **Sub-project 2:** filters, sort, detail view, status pills, debouncing.
-- **Sub-project 3:** AI agent layer (chat endpoint, tools, ReAct loop).
+- **Foundation:** data model, migrations, seeding, and the paginated list endpoint and view.
+- **Query UX:** filters, sort, detail view, status pills, debounced search, URL-driven state.
+- **AI agent:** `/api/chat` endpoint, read-only tools over the existing handlers, ReAct loop.
 
 See `docs/superpowers/specs/2026-05-12-investment-dashboard-foundation-design.md`
 and `docs/superpowers/plans/2026-05-12-investment-dashboard-foundation.md` for the

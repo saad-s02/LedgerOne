@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace LedgerOne.Api.Controllers;
 
 /// <summary>
-/// Natural-language agent surface. The contract is fully designed and the
-/// validation pipeline is wired up; the ReAct loop and tool implementations
-/// ship in sub-project 3. Until then the endpoint validates the request and
-/// returns 501 Not Implemented so callers see an honest signal.
+/// Natural-language agent surface. Validates the request, then runs a
+/// Claude-backed ReAct loop over read-only transaction tools and returns the
+/// final assistant message together with the tool calls made along the way.
 /// </summary>
 [ApiController]
 [Route("api/chat")]
@@ -27,6 +26,8 @@ public class ChatController(ChatHandler handler) : ControllerBase
     [ProducesResponseType(typeof(ChatResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status502BadGateway)]
+    [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status503ServiceUnavailable)]
+    [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status504GatewayTimeout)]
     public async Task<ActionResult<ChatResponse>> Post(
         [FromBody] ChatRequest request,
         CancellationToken ct)

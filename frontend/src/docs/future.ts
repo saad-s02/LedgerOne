@@ -22,8 +22,8 @@ export const FUTURE_IMPROVEMENTS: FutureItem[] = [
   },
   {
     rank: 4,
-    title: 'Chat endpoint (sub-project 3)',
-    body: 'ReAct loop over Anthropic Sonnet with search_transactions and get_transaction tools. Capped at 5 iterations to prevent runaway loops.',
+    title: 'Streaming chat responses (SSE)',
+    body: 'The current /api/chat returns the full ReAct loop in one shot. SSE would surface tool calls and partial text as the model produces them, closer to the UX of modern chat clients.',
   },
   {
     rank: 5,

@@ -6,6 +6,7 @@ import type {
   OpenApiParameter,
 } from '../../api/openapi';
 import { apiBaseUrl, resolveRef } from '../../api/openapi';
+import { OVERLAY } from '../../docs/overlay';
 import { StatusBadge } from './MethodBadge';
 
 interface Props {
@@ -27,10 +28,15 @@ interface FetchResult {
 }
 
 export function TryItPanel({ method, path, operation, spec, disabled, disabledReason }: Props) {
+  const example = operation.operationId ? OVERLAY.tryItExamples[operation.operationId] : undefined;
   const [paramValues, setParamValues] = useState<Record<string, string>>(() =>
-    defaultParamValues(operation.parameters ?? []),
+    defaultParamValues(operation.parameters ?? [], example?.parameters),
   );
-  const [requestBody, setRequestBody] = useState<string>(() => defaultRequestBody(spec, operation));
+  const [requestBody, setRequestBody] = useState<string>(() =>
+    example?.requestBody !== undefined
+      ? JSON.stringify(example.requestBody, null, 2)
+      : defaultRequestBody(spec, operation),
+  );
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FetchResult | null>(null);
 
@@ -207,9 +213,16 @@ function ParameterInput({
   );
 }
 
-function defaultParamValues(parameters: OpenApiParameter[]): Record<string, string> {
+function defaultParamValues(
+  parameters: OpenApiParameter[],
+  overlayValues?: Record<string, string>,
+): Record<string, string> {
   const out: Record<string, string> = {};
   for (const p of parameters) {
+    if (overlayValues && overlayValues[p.name] !== undefined) {
+      out[p.name] = overlayValues[p.name];
+      continue;
+    }
     const def = p.schema?.default;
     if (def !== undefined && def !== null) out[p.name] = String(def);
     else if (p.in === 'path' && p.name === 'id') out[p.name] = '1';
