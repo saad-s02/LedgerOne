@@ -43,7 +43,7 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
 {
     app.UseCors(DevCorsPolicy);
 }
