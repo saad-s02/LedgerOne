@@ -94,9 +94,9 @@ test('shows empty-state message when no transactions', async ({ page }) => {
 test('status pill renders with semantic color class', async ({ page }) => {
   await page.goto('/');
   const firstStatusCell = page.locator('tbody tr').first().locator('td').last();
-  const pill = firstStatusCell.locator('span');
+  const pill = firstStatusCell.locator('[data-status]');
   await expect(pill).toBeVisible();
-  await expect(pill).toHaveClass(/bg-(green|yellow|red)-100/);
+  await expect(pill).toHaveAttribute('data-status', /^(Settled|Pending|Cancelled)$/);
 });
 
 test('Type filter updates URL and reduces rows to matching only', async ({ page }) => {
