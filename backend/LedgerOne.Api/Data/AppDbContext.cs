@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         tx.Property(t => t.AccountId).IsRequired().HasMaxLength(32);
         tx.Property(t => t.AdvisorName).IsRequired().HasMaxLength(128);
         tx.Property(t => t.SecuritySymbol).HasMaxLength(16);
+        tx.Property(t => t.Notes).HasMaxLength(2000);
 
         tx.HasIndex(t => new { t.Status, t.TransactionDate })
             .HasDatabaseName("IX_Transactions_Status_TransactionDate")

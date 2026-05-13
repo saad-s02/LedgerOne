@@ -8,6 +8,7 @@ public static class TestSeeder
     public static async Task ResetAndSeedAsync(AppDbContext db, CancellationToken ct = default)
     {
         await db.Database.ExecuteSqlRawAsync("DELETE FROM Transactions", ct);
+        await db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Transactions'", ct);
         var rows = BuildFixture().ToList();
         db.Transactions.AddRange(rows);
         await db.SaveChangesAsync(ct);
@@ -16,6 +17,7 @@ public static class TestSeeder
     public static async Task ClearAsync(AppDbContext db, CancellationToken ct = default)
     {
         await db.Database.ExecuteSqlRawAsync("DELETE FROM Transactions", ct);
+        await db.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='Transactions'", ct);
     }
 
     private static IEnumerable<Transaction> BuildFixture()

@@ -18,7 +18,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
             var problem = new ValidationProblemDetails(
                 ve.Errors.ToDictionary(kv => kv.Key, kv => kv.Value))
             {
-                Type = "https://tools.ietf.org/html/rfc7807",
+                Type = "about:blank",
                 Title = "One or more validation errors occurred.",
                 Status = StatusCodes.Status400BadRequest,
             };
@@ -33,7 +33,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
 
         var serverProblem = new Microsoft.AspNetCore.Mvc.ProblemDetails
         {
-            Type = "https://tools.ietf.org/html/rfc7807",
+            Type = "about:blank",
             Title = "An unexpected error occurred.",
             Status = StatusCodes.Status500InternalServerError,
         };

@@ -1,9 +1,6 @@
-using LedgerOne.Api.Controllers;
 using LedgerOne.Api.Data;
 using LedgerOne.Api.Data.Seeding;
 using LedgerOne.Api.Infrastructure.Logging;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 

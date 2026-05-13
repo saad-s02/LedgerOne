@@ -128,22 +128,34 @@ public class ListTransactionsHandlerTests : IDisposable
             new Transaction
             {
                 TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                AccountId = "OLD", AdvisorName = "x", Type = TransactionType.Buy,
-                Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,
+                AccountId = "OLD",
+                AdvisorName = "x",
+                Type = TransactionType.Buy,
+                Amount = 1,
+                Currency = Currency.CAD,
+                Status = TransactionStatus.Settled,
                 CreatedAt = DateTime.UtcNow,
             },
             new Transaction
             {
                 TransactionDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc),
-                AccountId = "NEW", AdvisorName = "x", Type = TransactionType.Buy,
-                Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,
+                AccountId = "NEW",
+                AdvisorName = "x",
+                Type = TransactionType.Buy,
+                Amount = 1,
+                Currency = Currency.CAD,
+                Status = TransactionStatus.Settled,
                 CreatedAt = DateTime.UtcNow,
             },
             new Transaction
             {
                 TransactionDate = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc),
-                AccountId = "MID", AdvisorName = "x", Type = TransactionType.Buy,
-                Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,
+                AccountId = "MID",
+                AdvisorName = "x",
+                Type = TransactionType.Buy,
+                Amount = 1,
+                Currency = Currency.CAD,
+                Status = TransactionStatus.Settled,
                 CreatedAt = DateTime.UtcNow,
             });
         _db.SaveChanges();

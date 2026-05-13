@@ -2,7 +2,9 @@ import { test, expect } from '@playwright/test';
 import { seedFixture, clearFixture } from './helpers/api';
 
 test.describe.configure({ mode: 'serial' });
-test.beforeEach(async () => { await seedFixture(); });
+test.beforeEach(async () => {
+  await seedFixture();
+});
 
 test('list page loads and shows table with rows', async ({ page }) => {
   await page.goto('/');
@@ -20,7 +22,12 @@ test('Next button advances to page 2 and updates URL', async ({ page }) => {
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
 
-  const newFirstRowAccount = await page.locator('tbody tr').first().locator('td').nth(1).textContent();
+  const newFirstRowAccount = await page
+    .locator('tbody tr')
+    .first()
+    .locator('td')
+    .nth(1)
+    .textContent();
   expect(newFirstRowAccount).not.toBe(firstRowAccount);
   await expect(page.getByText(/Page 2 of \d+/)).toBeVisible();
 });
@@ -59,7 +66,11 @@ test('shows error banner with Retry on 500, retry recovers', async ({ page }) =>
   // React StrictMode double-invokes effects in development, so we must always
   // return 500 until explicitly unrouted, then let the retry through.
   const errorHandler = async (route: import('@playwright/test').Route) => {
-    await route.fulfill({ status: 500, body: '{"title":"boom","status":500}', contentType: 'application/json' });
+    await route.fulfill({
+      status: 500,
+      body: '{"title":"boom","status":500}',
+      contentType: 'application/json',
+    });
   };
   await page.route('http://localhost:5000/api/transactions*', errorHandler);
 

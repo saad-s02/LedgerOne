@@ -28,10 +28,7 @@ function ListPage() {
     return (
       <div className="rounded border border-red-300 bg-red-50 p-4 text-red-800">
         <div className="mb-2 font-medium">Couldn't load transactions</div>
-        <button
-          className="rounded bg-red-600 px-3 py-1 text-white"
-          onClick={() => refetch()}
-        >
+        <button className="rounded bg-red-600 px-3 py-1 text-white" onClick={() => refetch()}>
           Retry
         </button>
       </div>
