@@ -23,11 +23,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
                 Title = "One or more validation errors occurred.",
                 Status = StatusCodes.Status400BadRequest,
             };
-            problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-            httpContext.Response.ContentType = "application/problem+json";
-            await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
-            return true;
+            return await WriteProblem(httpContext, problem, StatusCodes.Status400BadRequest, cancellationToken);
         }
 
         if (exception is NotFoundException nf)
@@ -39,11 +35,47 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
                 Status = StatusCodes.Status404NotFound,
                 Detail = nf.Message,
             };
-            problem.Extensions["traceId"] = httpContext.TraceIdentifier;
-            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            httpContext.Response.ContentType = "application/problem+json";
-            await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
-            return true;
+            return await WriteProblem(httpContext, problem, StatusCodes.Status404NotFound, cancellationToken);
+        }
+
+        if (exception is ChatNotConfiguredException cnc)
+        {
+            logger.LogError(cnc, "Chat invoked but ANTHROPIC_API_KEY is not configured (traceId: {TraceId})",
+                httpContext.TraceIdentifier);
+            var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
+            {
+                Type = "about:blank",
+                Title = "Chat is not configured.",
+                Status = StatusCodes.Status503ServiceUnavailable,
+                Detail = cnc.Message,
+            };
+            return await WriteProblem(httpContext, problem, StatusCodes.Status503ServiceUnavailable, cancellationToken);
+        }
+
+        if (exception is ChatBackendException cbe)
+        {
+            logger.LogError(cbe, "Chat backend failure (traceId: {TraceId})", httpContext.TraceIdentifier);
+            var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
+            {
+                Type = "about:blank",
+                Title = "Chat service is unavailable.",
+                Status = StatusCodes.Status502BadGateway,
+                Detail = cbe.Message,
+            };
+            return await WriteProblem(httpContext, problem, StatusCodes.Status502BadGateway, cancellationToken);
+        }
+
+        if (exception is ChatTimeoutException cte)
+        {
+            logger.LogWarning(cte, "Chat request timed out (traceId: {TraceId})", httpContext.TraceIdentifier);
+            var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
+            {
+                Type = "about:blank",
+                Title = "Chat request timed out.",
+                Status = StatusCodes.Status504GatewayTimeout,
+                Detail = cte.Message,
+            };
+            return await WriteProblem(httpContext, problem, StatusCodes.Status504GatewayTimeout, cancellationToken);
         }
 
         logger.LogError(exception, "Unhandled exception (traceId: {TraceId})", httpContext.TraceIdentifier);
@@ -54,10 +86,16 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
             Title = "An unexpected error occurred.",
             Status = StatusCodes.Status500InternalServerError,
         };
-        serverProblem.Extensions["traceId"] = httpContext.TraceIdentifier;
-        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        httpContext.Response.ContentType = "application/problem+json";
-        await httpContext.Response.WriteAsJsonAsync(serverProblem, cancellationToken);
+        return await WriteProblem(httpContext, serverProblem, StatusCodes.Status500InternalServerError, cancellationToken);
+    }
+
+    private static async ValueTask<bool> WriteProblem(
+        HttpContext ctx, Microsoft.AspNetCore.Mvc.ProblemDetails problem, int status, CancellationToken ct)
+    {
+        problem.Extensions["traceId"] = ctx.TraceIdentifier;
+        ctx.Response.StatusCode = status;
+        ctx.Response.ContentType = "application/problem+json";
+        await ctx.Response.WriteAsJsonAsync(problem, ct);
         return true;
     }
 }
