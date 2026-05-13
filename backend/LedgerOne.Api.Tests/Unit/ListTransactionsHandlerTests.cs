@@ -248,4 +248,22 @@ public class ListTransactionsHandlerTests : IDisposable
 
         response.Data.Select(d => d.AccountId).Should().ContainInOrder("SMALL", "MID", "BIG");
     }
+
+    [Fact]
+    public async Task Handle_FilterByType_ReturnsOnlyMatchingRows()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "A", AdvisorName = "x", Type = TransactionType.Buy,  Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "B", AdvisorName = "x", Type = TransactionType.Sell, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "C", AdvisorName = "x", Type = TransactionType.Buy,  Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { Type = TransactionType.Buy },
+            ct);
+
+        response.Total.Should().Be(2);
+        response.Data.Select(d => d.Type).Should().AllSatisfy(t => t.Should().Be(TransactionType.Buy));
+    }
 }

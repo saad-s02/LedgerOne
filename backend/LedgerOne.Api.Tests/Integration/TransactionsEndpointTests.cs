@@ -48,6 +48,22 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task Get_Transactions_FilterByType_ReturnsOnlyMatchingRows()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        var response = await client.GetAsync("/api/transactions?type=Buy", ct);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var envelope = await response.Content.ReadFromJsonAsync<ListTransactionsResponse>(JsonOptions, ct);
+        envelope.Should().NotBeNull();
+        envelope!.Total.Should().Be(12);
+        envelope.Data.Should().AllSatisfy(d => d.Type.Should().Be(LedgerOne.Api.Domain.TransactionType.Buy));
+    }
+
+    [Fact]
     public async Task Get_Transactions_SortByAmountDesc_ReturnsLargestFirst()
     {
         var ct = TestContext.Current.CancellationToken;

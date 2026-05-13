@@ -14,7 +14,7 @@ public class ListTransactionsHandler(
     {
         await validator.ValidateOrThrowAsync(req, ct);
 
-        IQueryable<Transaction> query = db.Transactions;
+        var query = BuildQuery(db.Transactions, req);
 
         var total = await query.CountAsync(ct);
 
@@ -42,5 +42,11 @@ public class ListTransactionsHandler(
             (SortField.Amount, SortDirection.Asc ) => query.OrderBy(t => t.Amount).ThenBy(t => t.Id),
             _ => query.OrderByDescending(t => t.TransactionDate).ThenByDescending(t => t.Id),
         };
+    }
+
+    private static IQueryable<Transaction> BuildQuery(IQueryable<Transaction> query, ListTransactionsRequest req)
+    {
+        if (req.Type.HasValue) query = query.Where(t => t.Type == req.Type.Value);
+        return query;
     }
 }
