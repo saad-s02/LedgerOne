@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTransactions, transactionsKey } from '../api/transactions';
 import { listSearchSchema, DEFAULT_LIST_SEARCH, isAnyFilterActive } from '../lib/listSearch';
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/')({
 
 function ListPage() {
   const search = Route.useSearch();
-  const navigate = Route.useNavigate();
+  const navigate = useNavigate();
 
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: transactionsKey(search),
@@ -56,7 +56,28 @@ function ListPage() {
                 <SkeletonRows count={8} columns={7} />
               ) : (
                 data.data.map((t) => (
-                  <tr key={t.id} className="border-b border-gray-100">
+                  <tr
+                    key={t.id}
+                    role="button"
+                    tabIndex={0}
+                    className="cursor-pointer border-b border-gray-100 hover:bg-gray-50"
+                    onClick={() =>
+                      navigate({
+                        to: '/transactions/$id',
+                        params: { id: String(t.id) },
+                        search,
+                      })
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        navigate({
+                          to: '/transactions/$id',
+                          params: { id: String(t.id) },
+                          search,
+                        });
+                      }
+                    }}
+                  >
                     <td className="px-3 py-2">{t.transactionDate.slice(0, 10)}</td>
                     <td className="px-3 py-2">{t.accountId}</td>
                     <td className="px-3 py-2">{t.advisorName}</td>
