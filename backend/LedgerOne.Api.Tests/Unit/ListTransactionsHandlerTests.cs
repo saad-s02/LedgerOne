@@ -384,4 +384,32 @@ public class ListTransactionsHandlerTests : IDisposable
 
         response.Total.Should().Be(5);
     }
+
+    [Fact]
+    public async Task Handle_NegativeMinAmount_ThrowsValidationException()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var act = async () => await _sut.Handle(new ListTransactionsRequest { MinAmount = -1m }, ct);
+        var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
+        ex.Which.Errors.Should().ContainKey("minAmount");
+    }
+
+    [Fact]
+    public async Task Handle_NegativeMaxAmount_ThrowsValidationException()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var act = async () => await _sut.Handle(new ListTransactionsRequest { MaxAmount = -1m }, ct);
+        var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
+        ex.Which.Errors.Should().ContainKey("maxAmount");
+    }
+
+    [Fact]
+    public async Task Handle_MaxLessThanMin_ThrowsValidationException()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var act = async () => await _sut.Handle(
+            new ListTransactionsRequest { MinAmount = 100m, MaxAmount = 50m }, ct);
+        var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
+        ex.Which.Errors.Should().ContainKey("amountRange");
+    }
 }
