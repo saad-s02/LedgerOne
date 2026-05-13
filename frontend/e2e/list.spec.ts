@@ -105,3 +105,10 @@ test('Type filter updates URL and reduces rows to matching only', async ({ page 
   await expect(page).toHaveURL(/[?&]type=Buy(&|$)/);
   await expect(page.locator('tbody tr')).toHaveCount(12);
 });
+
+test('Status filter updates URL and reduces rows to matching only', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Status').selectOption('Pending');
+  await expect(page).toHaveURL(/[?&]status=Pending(&|$)/);
+  await expect(page.locator('tbody tr')).toHaveCount(20);
+});
