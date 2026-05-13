@@ -154,3 +154,18 @@ test('changing a filter from page=2 returns to page=1', async ({ page }) => {
 
   await expect(page).toHaveURL(/[?&]page=1(&|$)/);
 });
+
+test('empty state with active filter offers Clear Filters that restores rows', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Type').selectOption('Buy');
+  await page.getByLabel('Search').fill('zzzzz-not-found');
+  await expect(page).toHaveURL(/[?&]search=zzzzz-not-found(&|$)/, { timeout: 2000 });
+
+  await expect(page.getByText('No transactions match these filters')).toBeVisible();
+  await page.getByRole('button', { name: 'Clear Filters' }).click();
+
+  await expect(page).not.toHaveURL(/[?&]search=/);
+  await expect(page).not.toHaveURL(/[?&]type=/);
+  await expect(page.locator('tbody tr[data-testid="skeleton-row"]')).toHaveCount(0);
+  await expect(page.locator('tbody tr')).toHaveCount(25);
+});

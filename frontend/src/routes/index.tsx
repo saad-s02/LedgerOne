@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTransactions, transactionsKey } from '../api/transactions';
-import { listSearchSchema } from '../lib/listSearch';
+import { listSearchSchema, DEFAULT_LIST_SEARCH, isAnyFilterActive } from '../lib/listSearch';
 import { StatusPill } from '../components/StatusPill';
 import { SkeletonRows } from '../components/SkeletonRows';
 import { FilterBar } from '../components/FilterBar';
@@ -78,7 +78,21 @@ function ListPage() {
             </tbody>
           </table>
           {!isPending && data.total === 0 && (
-            <div className="mt-4 text-gray-600">No transactions</div>
+            <div className="mt-4 flex flex-col items-start gap-2 text-gray-600">
+              {isAnyFilterActive(search) ? (
+                <>
+                  <div>No transactions match these filters</div>
+                  <button
+                    className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50"
+                    onClick={() => navigate({ search: () => DEFAULT_LIST_SEARCH })}
+                  >
+                    Clear Filters
+                  </button>
+                </>
+              ) : (
+                <div>No transactions</div>
+              )}
+            </div>
           )}
           {!isPending && data.total > 0 && (
             <div className="mt-4 flex items-center gap-3">
