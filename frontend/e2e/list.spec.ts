@@ -71,3 +71,10 @@ test('shows error banner with Retry on 500, retry recovers', async ({ page }) =>
   await page.getByRole('button', { name: 'Retry' }).click();
   await expect(page.locator('tbody tr').first()).toBeVisible();
 });
+
+test('shows empty-state message when no transactions', async ({ page }) => {
+  await clearFixture();
+  await page.goto('/');
+  await expect(page.getByText('No transactions')).toBeVisible();
+  await expect(page.locator('table')).not.toBeVisible();
+});
