@@ -36,3 +36,9 @@ test-results/
 
 # Superpowers brainstorm sessions
 .superpowers/
+
+# Claude Code local state
+.claude/
+
+# TanStack Router dev cache
+.tanstack/
