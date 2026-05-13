@@ -45,12 +45,29 @@ test('Next button is disabled on last page', async ({ page }) => {
 });
 
 test('shows loading state before rows appear', async ({ page }) => {
-  await page.route('**/api/transactions**', async (route) => {
+  await page.route('http://localhost:5000/api/transactions*', async (route) => {
     await new Promise((r) => setTimeout(r, 500));
     await route.continue();
   });
   const navigation = page.goto('/');
   await expect(page.getByText('Loading…')).toBeVisible();
   await navigation;
+  await expect(page.locator('tbody tr').first()).toBeVisible();
+});
+
+test('shows error banner with Retry on 500, retry recovers', async ({ page }) => {
+  // React StrictMode double-invokes effects in development, so we must always
+  // return 500 until explicitly unrouted, then let the retry through.
+  const errorHandler = async (route: import('@playwright/test').Route) => {
+    await route.fulfill({ status: 500, body: '{"title":"boom","status":500}', contentType: 'application/json' });
+  };
+  await page.route('http://localhost:5000/api/transactions*', errorHandler);
+
+  await page.goto('/?page=1');
+  await expect(page.getByText("Couldn't load transactions")).toBeVisible();
+
+  // Remove the error route before clicking Retry so the real call succeeds
+  await page.unroute('http://localhost:5000/api/transactions*', errorHandler);
+  await page.getByRole('button', { name: 'Retry' }).click();
   await expect(page.locator('tbody tr').first()).toBeVisible();
 });
