@@ -37,7 +37,7 @@ internal sealed class LedgerOneDocumentTransformer(IHostEnvironment env) : IOpen
             Contact = new OpenApiContact
             {
                 Name = "Saad Siddiqui",
-                Email = "saadsidd2002@gmail.com",
+                Email = "saadsidd073@gmail.com",
             },
         };
 
