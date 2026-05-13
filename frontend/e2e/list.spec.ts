@@ -43,3 +43,14 @@ test('Next button is disabled on last page', async ({ page }) => {
   await expect(page.getByText('Page 3 of 3')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
 });
+
+test('shows loading state before rows appear', async ({ page }) => {
+  await page.route('**/api/transactions**', async (route) => {
+    await new Promise((r) => setTimeout(r, 500));
+    await route.continue();
+  });
+  const navigation = page.goto('/');
+  await expect(page.getByText('Loading…')).toBeVisible();
+  await navigation;
+  await expect(page.locator('tbody tr').first()).toBeVisible();
+});
