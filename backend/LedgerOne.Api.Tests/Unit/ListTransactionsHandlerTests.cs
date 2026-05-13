@@ -254,9 +254,9 @@ public class ListTransactionsHandlerTests : IDisposable
     {
         var ct = TestContext.Current.CancellationToken;
         _db.Transactions.AddRange(
-            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "A", AdvisorName = "x", Type = TransactionType.Buy,  Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "A", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
             new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "B", AdvisorName = "x", Type = TransactionType.Sell, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
-            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "C", AdvisorName = "x", Type = TransactionType.Buy,  Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "C", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
         _db.SaveChanges();
 
         var response = await _sut.Handle(
@@ -272,9 +272,9 @@ public class ListTransactionsHandlerTests : IDisposable
     {
         var ct = TestContext.Current.CancellationToken;
         _db.Transactions.AddRange(
-            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "A", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Pending,   CreatedAt = DateTime.UtcNow },
-            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "B", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled,   CreatedAt = DateTime.UtcNow },
-            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "C", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Pending,   CreatedAt = DateTime.UtcNow });
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "A", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Pending, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc), AccountId = "B", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 1, 3, 0, 0, 0, DateTimeKind.Utc), AccountId = "C", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Pending, CreatedAt = DateTime.UtcNow });
         _db.SaveChanges();
 
         var response = await _sut.Handle(
@@ -327,7 +327,7 @@ public class ListTransactionsHandlerTests : IDisposable
             new ListTransactionsRequest
             {
                 FromDate = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc),
-                ToDate   = new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+                ToDate = new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc),
             },
             ct);
 

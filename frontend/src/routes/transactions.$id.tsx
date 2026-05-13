@@ -21,11 +21,7 @@ function DetailPage() {
   });
 
   const backLink = (
-    <Link
-      to="/"
-      search={(prev) => prev}
-      className="text-sm text-blue-700 hover:underline"
-    >
+    <Link to="/" search={(prev) => prev} className="text-sm text-blue-700 hover:underline">
       ← Back to list
     </Link>
   );
@@ -62,10 +58,7 @@ function DetailPage() {
         ) : (
           <div className="rounded border border-red-300 bg-red-50 p-4 text-red-800">
             <div className="mb-2 font-medium">Couldn't load the transaction</div>
-            <button
-              className="rounded bg-red-600 px-3 py-1 text-white"
-              onClick={() => refetch()}
-            >
+            <button className="rounded bg-red-600 px-3 py-1 text-white" onClick={() => refetch()}>
               Retry
             </button>
           </div>

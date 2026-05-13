@@ -32,9 +32,9 @@ export const DEFAULT_LIST_SEARCH: ListSearch = {
 export function isAnyFilterActive(search: ListSearch): boolean {
   return Boolean(
     search.fromDate ||
-      search.toDate ||
-      search.type ||
-      search.status ||
-      (search.search && search.search.trim().length > 0),
+    search.toDate ||
+    search.type ||
+    search.status ||
+    (search.search && search.search.trim().length > 0),
   );
 }

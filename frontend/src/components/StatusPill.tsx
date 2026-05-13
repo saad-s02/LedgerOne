@@ -8,9 +8,7 @@ const STYLES: Record<TransactionStatus, string> = {
 
 export function StatusPill({ status }: { status: TransactionStatus }) {
   return (
-    <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STYLES[status]}`}
-    >
+    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STYLES[status]}`}>
       {status}
     </span>
   );

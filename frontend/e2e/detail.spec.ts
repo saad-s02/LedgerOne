@@ -17,7 +17,10 @@ test('row click navigates to detail page with all fields visible', async ({ page
   await expect(page.getByText('Advisor', { exact: true })).toBeVisible();
   await expect(page.getByText('Notes')).toBeVisible();
   await expect(
-    page.locator('span').filter({ hasText: /^(Settled|Pending|Cancelled)$/ }).first(),
+    page
+      .locator('span')
+      .filter({ hasText: /^(Settled|Pending|Cancelled)$/ })
+      .first(),
   ).toBeVisible();
 });
 
