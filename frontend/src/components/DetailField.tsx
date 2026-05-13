@@ -1,0 +1,24 @@
+import { motion } from 'motion/react';
+import type { ReactNode } from 'react';
+
+interface Props {
+  label: string;
+  children: ReactNode;
+  index?: number;
+}
+
+export function DetailField({ label, children, index = 0 }: Props) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: 0.05 + index * 0.025 }}
+      className="flex flex-col gap-1"
+    >
+      <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-text-dim">
+        {label}
+      </span>
+      <span className="text-[13px] text-text-bright">{children}</span>
+    </motion.div>
+  );
+}
