@@ -30,21 +30,21 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
   const bodySchema = operation.requestBody?.content?.['application/json']?.schema;
 
   return (
-    <article id={`op-${opId}`} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      <header className="border-b border-gray-100 bg-gray-50 px-5 py-4">
+    <article id={`op-${opId}`} className="overflow-hidden rounded-xl border border-line bg-bg-elev shadow-sm">
+      <header className="border-b border-line bg-bg-elev px-5 py-4">
         <div className="flex flex-wrap items-center gap-3">
           <MethodBadge method={method} />
-          <code className="font-mono text-sm font-semibold text-gray-900">{path}</code>
+          <code className="font-mono text-sm font-semibold text-text-bright">{path}</code>
           <div className="ml-auto">
             <ImplStatusBadge status={status} />
           </div>
         </div>
-        {operation.summary && <p className="mt-2 text-sm text-gray-700">{operation.summary}</p>}
+        {operation.summary && <p className="mt-2 text-sm text-text">{operation.summary}</p>}
       </header>
 
       <div className="space-y-5 px-5 py-5">
         {operation.description && (
-          <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">{operation.description}</p>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-text">{operation.description}</p>
         )}
 
         {note && (
@@ -53,9 +53,9 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
 
         {operation.parameters && operation.parameters.length > 0 && (
           <Section title="Parameters">
-            <div className="overflow-hidden rounded border border-gray-200">
+            <div className="overflow-hidden rounded border border-line">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                <thead className="bg-bg-elev text-xs uppercase tracking-wider text-text-dim">
                   <tr>
                     <th className="px-3 py-2 text-left">Name</th>
                     <th className="px-3 py-2 text-left">In</th>
@@ -66,14 +66,14 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
                 </thead>
                 <tbody>
                   {operation.parameters.map((p) => (
-                    <tr key={p.name} className="border-t border-gray-100 align-top">
-                      <td className="px-3 py-2 font-mono text-xs text-gray-900">{p.name}</td>
-                      <td className="px-3 py-2 font-mono text-xs text-gray-600">{p.in}</td>
-                      <td className="px-3 py-2 font-mono text-xs text-gray-700">
+                    <tr key={p.name} className="border-t border-line align-top">
+                      <td className="px-3 py-2 font-mono text-xs text-text-bright">{p.name}</td>
+                      <td className="px-3 py-2 font-mono text-xs text-text-dim">{p.in}</td>
+                      <td className="px-3 py-2 font-mono text-xs text-text">
                         {p.schema?.enum ? p.schema.enum.join(' | ') : (p.schema?.format ?? p.schema?.type ?? 'string')}
                       </td>
-                      <td className="px-3 py-2 text-xs text-gray-700">{p.required ? 'yes' : ''}</td>
-                      <td className="px-3 py-2 text-xs text-gray-600">{p.description ?? ''}</td>
+                      <td className="px-3 py-2 text-xs text-text">{p.required ? 'yes' : ''}</td>
+                      <td className="px-3 py-2 text-xs text-text-dim">{p.description ?? ''}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -94,17 +94,17 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
               {jsonResponses.map(([code, resp]) => {
                 const respSchema = resp.content?.['application/json']?.schema;
                 return (
-                  <div key={code} className="rounded border border-gray-200">
-                    <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-3 py-1.5">
+                  <div key={code} className="rounded border border-line">
+                    <div className="flex items-center gap-2 border-b border-line bg-bg-elev px-3 py-1.5">
                       <StatusBadge code={code} />
-                      {resp.description && <span className="text-xs text-gray-700">{resp.description}</span>}
+                      {resp.description && <span className="text-xs text-text">{resp.description}</span>}
                     </div>
                     {respSchema ? (
                       <div className="p-3">
                         <SchemaTable spec={spec} schema={respSchema} />
                       </div>
                     ) : (
-                      <div className="px-3 py-2 text-xs text-gray-500">No body.</div>
+                      <div className="px-3 py-2 text-xs text-text-dim">No body.</div>
                     )}
                   </div>
                 );
@@ -116,7 +116,7 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
         <div>
           <button
             onClick={() => setTryItOpen((o) => !o)}
-            className="text-sm font-medium text-blue-700 hover:text-blue-900"
+            className="text-sm font-medium text-cyan hover:text-text-bright"
           >
             {tryItOpen ? '▾ Hide Try It' : '▸ Try this endpoint'}
           </button>
@@ -132,7 +132,7 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
           />
         )}
         {!tryItOpen && tryDisabled && tryDisabledReason && (
-          <p className="-mt-3 text-xs text-gray-500">{tryDisabledReason}</p>
+          <p className="-mt-3 text-xs text-text-dim">{tryDisabledReason}</p>
         )}
       </div>
     </article>
@@ -142,7 +142,7 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500">{title}</h4>
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-text-dim">{title}</h4>
       {children}
     </section>
   );
@@ -156,9 +156,11 @@ function DesignNoteCallout({
   references: import('../../docs/decisions').DecisionId[];
 }) {
   return (
-    <aside className="rounded-md border-l-4 border-amber-400 bg-amber-50 p-3">
-      <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-900">Design notes</div>
-      <p className="text-sm leading-relaxed text-amber-950">{summary}</p>
+    <aside className="rounded-md border-l-4 border-amber-400 bg-amber-400/[0.08] p-3">
+      <div className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-400">
+        Design notes
+      </div>
+      <p className="text-sm leading-relaxed text-text">{summary}</p>
       {references.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {references.map((id) => {
@@ -167,7 +169,7 @@ function DesignNoteCallout({
               <a
                 key={id}
                 href={`#decision-${id}`}
-                className="rounded border border-amber-300 bg-white px-2 py-0.5 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                className="rounded border border-amber-400/40 bg-amber-400/[0.12] px-2 py-0.5 text-xs font-medium text-amber-400 hover:bg-amber-400/[0.2]"
                 title={d.title}
               >
                 Decision #{d.number} · {d.shortLabel}

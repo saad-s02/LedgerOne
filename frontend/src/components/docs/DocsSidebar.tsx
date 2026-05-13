@@ -31,17 +31,19 @@ export function DocsSidebar({ sections }: Props) {
 
   return (
     <nav className="sticky top-6 w-56 shrink-0 self-start">
-      <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">On this page</div>
+      <div className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-text-dim">
+        On this page
+      </div>
       <ul className="space-y-1">
         {sections.map((s) => (
           <li key={s.id}>
             <a
               href={`#${s.id}`}
               className={
-                'block rounded px-3 py-1.5 text-sm transition-colors ' +
+                'block py-1.5 text-sm transition-colors ' +
                 (activeId === s.id
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900')
+                  ? 'border-l-2 border-cyan pl-3 text-cyan'
+                  : 'pl-3 text-text-dim hover:text-text-bright')
               }
             >
               {s.label}

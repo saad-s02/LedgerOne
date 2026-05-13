@@ -8,16 +8,16 @@ interface Props {
 
 export function SchemaTable({ spec, schema }: Props) {
   const resolved = resolveRef<OpenApiSchema>(spec, schema);
-  if (!resolved) return <div className="text-sm text-gray-500">No schema.</div>;
+  if (!resolved) return <div className="text-sm text-text-dim">No schema.</div>;
   const props = resolved.properties;
   if (!props) {
-    return <pre className="rounded bg-gray-50 p-3 text-xs text-gray-700">{describeSchema(spec, resolved)}</pre>;
+    return <pre className="rounded bg-bg-elev p-3 text-xs text-text">{describeSchema(spec, resolved)}</pre>;
   }
   const required = new Set(resolved.required ?? []);
   return (
-    <div className="overflow-hidden rounded border border-gray-200">
+    <div className="overflow-hidden rounded border border-line">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+        <thead className="bg-bg-elev text-xs uppercase tracking-wider text-text-dim">
           <tr>
             <th className="px-3 py-2 text-left">Field</th>
             <th className="px-3 py-2 text-left">Type</th>
@@ -29,11 +29,11 @@ export function SchemaTable({ spec, schema }: Props) {
           {Object.entries(props).map(([name, child]) => {
             const c = resolveRef<OpenApiSchema>(spec, child) ?? child;
             return (
-              <tr key={name} className="border-t border-gray-100 align-top">
-                <td className="px-3 py-2 font-mono text-xs text-gray-900">{name}</td>
-                <td className="px-3 py-2 font-mono text-xs text-gray-700">{describeSchema(spec, c)}</td>
-                <td className="px-3 py-2 text-xs text-gray-700">{required.has(name) ? 'yes' : ''}</td>
-                <td className="px-3 py-2 text-xs text-gray-600">{c.description ?? ''}</td>
+              <tr key={name} className="border-t border-line align-top">
+                <td className="px-3 py-2 font-mono text-xs text-text-bright">{name}</td>
+                <td className="px-3 py-2 font-mono text-xs text-text">{describeSchema(spec, c)}</td>
+                <td className="px-3 py-2 text-xs text-text">{required.has(name) ? 'yes' : ''}</td>
+                <td className="px-3 py-2 text-xs text-text-dim">{c.description ?? ''}</td>
               </tr>
             );
           })}

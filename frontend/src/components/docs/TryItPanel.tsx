@@ -75,15 +75,15 @@ export function TryItPanel({ method, path, operation, spec, disabled, disabledRe
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-lg border border-line bg-bg-elev p-4">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-xs font-semibold uppercase tracking-wider text-gray-500">Try it</div>
-        <div className="font-mono text-xs text-gray-500">{requestUrl}</div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-text-dim">Try it</div>
+        <div className="font-mono text-xs text-text-dim">{requestUrl}</div>
       </div>
 
       {operation.parameters && operation.parameters.length > 0 && (
         <div className="mb-3 space-y-2">
-          <div className="text-xs font-medium text-gray-700">Parameters</div>
+          <div className="text-xs font-medium text-text">Parameters</div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {operation.parameters.map((p) => (
               <ParameterInput
@@ -99,11 +99,11 @@ export function TryItPanel({ method, path, operation, spec, disabled, disabledRe
 
       {hasBody && (
         <div className="mb-3 space-y-1">
-          <div className="text-xs font-medium text-gray-700">Request body (JSON)</div>
+          <div className="text-xs font-medium text-text">Request body (JSON)</div>
           <textarea
             value={requestBody}
             onChange={(e) => setRequestBody(e.target.value)}
-            className="h-32 w-full rounded border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-xs"
+            className="h-32 w-full rounded border border-line bg-bg-elev px-3 py-2 font-mono text-xs"
           />
         </div>
       )}
@@ -112,32 +112,32 @@ export function TryItPanel({ method, path, operation, spec, disabled, disabledRe
         <button
           onClick={send}
           disabled={disabled || loading}
-          className="rounded-md bg-gray-900 px-4 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md border border-cyan/40 bg-cyan/[0.12] px-4 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.08em] text-cyan shadow-sm hover:bg-cyan/[0.2] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Sending…' : 'Send request'}
         </button>
-        {disabled && disabledReason && <span className="text-xs text-gray-500">{disabledReason}</span>}
+        {disabled && disabledReason && <span className="text-xs text-text-dim">{disabledReason}</span>}
       </div>
 
       {result && (
         <div className="mt-4 space-y-3">
           <div className="flex flex-wrap items-center gap-3 text-sm">
             {result.error ? (
-              <span className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-800">
+              <span className="rounded border border-rose-500/40 bg-rose-500/[0.05] px-2 py-1 text-xs font-medium text-rose-300">
                 {result.error}
               </span>
             ) : (
               <>
                 <StatusBadge code={String(result.status)} />
-                <span className="text-gray-700">{result.statusText}</span>
-                <span className="text-gray-500">·</span>
-                <span className="font-mono text-xs text-gray-600">{result.elapsedMs} ms</span>
+                <span className="text-text">{result.statusText}</span>
+                <span className="text-text-dim">·</span>
+                <span className="font-mono text-xs text-text-dim">{result.elapsedMs} ms</span>
                 {result.correlationId && (
                   <>
-                    <span className="text-gray-500">·</span>
+                    <span className="text-text-dim">·</span>
                     <button
                       onClick={() => navigator.clipboard.writeText(result.correlationId!)}
-                      className="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-700 hover:bg-gray-100"
+                      className="rounded border border-line bg-bg-elev px-2 py-0.5 font-mono text-xs text-text hover:bg-bg-elev-2"
                       title="Click to copy"
                     >
                       X-Correlation-Id: {result.correlationId}
@@ -148,7 +148,7 @@ export function TryItPanel({ method, path, operation, spec, disabled, disabledRe
             )}
           </div>
           {result.body && (
-            <pre className="max-h-80 overflow-auto rounded border border-gray-200 bg-gray-900 p-3 font-mono text-xs leading-relaxed text-emerald-100">
+            <pre className="max-h-80 overflow-auto rounded border border-line bg-bg p-3 font-mono text-xs leading-relaxed text-emerald-300">
               {result.body}
             </pre>
           )}
@@ -170,16 +170,16 @@ function ParameterInput({
   const enumValues = parameter.schema?.enum as string[] | undefined;
   return (
     <label className="flex flex-col gap-1 text-xs">
-      <span className="font-mono text-gray-700">
+      <span className="font-mono text-text">
         {parameter.name}
-        {parameter.required && <span className="text-red-600"> *</span>}
-        <span className="ml-1 text-gray-400">({parameter.in})</span>
+        {parameter.required && <span className="text-rose-400"> *</span>}
+        <span className="ml-1 text-text-dim">({parameter.in})</span>
       </span>
       {enumValues ? (
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="rounded border border-gray-200 bg-white px-2 py-1 font-mono text-xs"
+          className="rounded border border-line bg-bg-elev px-2 py-1 font-mono text-xs"
         >
           <option value="">—</option>
           {enumValues.map((v) => (
@@ -193,7 +193,7 @@ function ParameterInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={parameter.schema?.format ?? parameter.schema?.type ?? ''}
-          className="rounded border border-gray-200 bg-white px-2 py-1 font-mono text-xs"
+          className="rounded border border-line bg-bg-elev px-2 py-1 font-mono text-xs"
         />
       )}
     </label>
