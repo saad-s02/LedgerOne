@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -32,6 +33,8 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public new async ValueTask DisposeAsync()
     {
         await base.DisposeAsync();
+        // Release pooled SQLite connections so the file handle is closed before deletion.
+        SqliteConnection.ClearAllPools();
         if (File.Exists(DbPath)) File.Delete(DbPath);
     }
 }

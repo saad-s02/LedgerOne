@@ -95,7 +95,8 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         problem.Extensions["traceId"] = ctx.TraceIdentifier;
         ctx.Response.StatusCode = status;
         ctx.Response.ContentType = "application/problem+json";
-        await ctx.Response.WriteAsJsonAsync(problem, ct);
+        // Serialize using the runtime type so ValidationProblemDetails.Errors is included.
+        await ctx.Response.WriteAsJsonAsync(problem, problem.GetType(), options: null, contentType: null, ct);
         return true;
     }
 }
