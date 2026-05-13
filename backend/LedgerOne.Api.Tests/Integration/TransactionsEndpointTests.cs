@@ -163,4 +163,45 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
             .Zip(envelope.Data.Skip(1), (a, b) => a.Amount >= b.Amount)
             .Should().AllSatisfy(ordered => ordered.Should().BeTrue());
     }
+
+    [Fact]
+    public async Task Get_Transactions_MinAmount_FiltersBelowBound()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        // Seeded amounts: 100 + i*137.5 for i=0..59, max ≈ 8212.
+        // minAmount=5000 selects rows where i>=36 (amount ≥ 5050), giving non-empty results.
+        var envelope = await client.GetFromJsonAsync<ListTransactionsResponse>(
+            "/api/transactions?minAmount=5000", JsonOptions, ct);
+        envelope.Should().NotBeNull();
+        envelope!.Data.Should().NotBeEmpty();
+        envelope.Data.Should().OnlyContain(t => t.Amount >= 5000m);
+    }
+
+    [Fact]
+    public async Task Get_Transactions_MinAndMaxAmount_ReturnsIntersection()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        var envelope = await client.GetFromJsonAsync<ListTransactionsResponse>(
+            "/api/transactions?minAmount=5000&maxAmount=20000", JsonOptions, ct);
+        envelope.Should().NotBeNull();
+        envelope!.Data.Should().OnlyContain(t => t.Amount >= 5000m && t.Amount <= 20000m);
+    }
+
+    [Fact]
+    public async Task Get_Transactions_MaxLessThanMin_Returns400ProblemDetails()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/api/transactions?minAmount=100&maxAmount=50", ct);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync(ct);
+        body.Should().Contain("amountRange");
+    }
 }

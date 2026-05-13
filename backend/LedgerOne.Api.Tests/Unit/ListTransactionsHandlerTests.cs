@@ -412,4 +412,35 @@ public class ListTransactionsHandlerTests : IDisposable
         var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
         ex.Which.Errors.Should().ContainKey("amountRange");
     }
+
+    [Fact]
+    public async Task Handle_MinAmount_ReturnsOnlyRowsAtOrAboveBound()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(10);  // amounts 100..109
+        var response = await _sut.Handle(new ListTransactionsRequest { MinAmount = 105m }, ct);
+        response.Total.Should().Be(5);
+        response.Data.Should().OnlyContain(t => t.Amount >= 105m);
+    }
+
+    [Fact]
+    public async Task Handle_MaxAmount_ReturnsOnlyRowsAtOrBelowBound()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(10);  // amounts 100..109
+        var response = await _sut.Handle(new ListTransactionsRequest { MaxAmount = 103m }, ct);
+        response.Total.Should().Be(4);
+        response.Data.Should().OnlyContain(t => t.Amount <= 103m);
+    }
+
+    [Fact]
+    public async Task Handle_MinAndMaxAmount_ReturnsIntersection()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        SeedRows(10);  // amounts 100..109
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { MinAmount = 103m, MaxAmount = 106m }, ct);
+        response.Total.Should().Be(4);
+        response.Data.Should().OnlyContain(t => t.Amount >= 103m && t.Amount <= 106m);
+    }
 }
