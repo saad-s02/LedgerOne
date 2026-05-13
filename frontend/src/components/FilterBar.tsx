@@ -46,6 +46,24 @@ export function FilterBar({ value, onChange }: Props) {
           ))}
         </select>
       </label>
+      <label className="flex flex-col text-xs text-gray-600">
+        <span>From</span>
+        <input
+          type="date"
+          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          value={value.fromDate ?? ''}
+          onChange={(e) => onChange({ fromDate: e.target.value || undefined })}
+        />
+      </label>
+      <label className="flex flex-col text-xs text-gray-600">
+        <span>To</span>
+        <input
+          type="date"
+          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          value={value.toDate ?? ''}
+          onChange={(e) => onChange({ toDate: e.target.value || undefined })}
+        />
+      </label>
     </div>
   );
 }
