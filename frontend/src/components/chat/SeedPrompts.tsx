@@ -13,7 +13,9 @@ export function SeedPrompts({
 }) {
   return (
     <div className="space-y-3 p-4" data-testid="seed-prompts">
-      <div className="text-sm font-medium text-slate-700">Try asking…</div>
+      <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim">
+        Try asking…
+      </div>
       <div className="space-y-2">
         {PROMPTS.map((p) => (
           <button
@@ -21,7 +23,7 @@ export function SeedPrompts({
             type="button"
             disabled={disabled}
             onClick={() => onSend(p)}
-            className="w-full rounded border border-slate-200 bg-white px-3 py-2 text-left text-sm hover:bg-slate-50 disabled:opacity-50"
+            className="w-full rounded-[3px] border border-line bg-bg px-3 py-2 text-left text-[12px] text-text transition-colors duration-[120ms] hover:border-cyan/40 hover:bg-cyan/[0.04] hover:text-text-bright disabled:cursor-not-allowed disabled:opacity-50"
           >
             {p}
           </button>
