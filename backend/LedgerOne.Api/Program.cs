@@ -24,6 +24,15 @@ var mvc = builder.Services.AddControllers().AddJsonOptions(opts =>
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<LedgerOne.Api.Infrastructure.ProblemDetails.GlobalExceptionHandler>();
 
+const string DevCorsPolicy = "DevCorsPolicy";
+builder.Services.AddCors(opts =>
+{
+    opts.AddPolicy(DevCorsPolicy, p => p
+        .WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
+
 builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.ListTransactionsHandler>();
 
 builder.Services.AddDbContext<AppDbContext>(opts =>
@@ -33,6 +42,11 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
 });
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors(DevCorsPolicy);
+}
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
