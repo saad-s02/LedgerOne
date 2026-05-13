@@ -16,6 +16,7 @@ test('docs page renders all sections from the live OpenAPI spec', async ({ page 
     'Authentication',
     'Endpoints',
     'Data model',
+    'SQL schema',
     'Design decisions',
     'Scale considerations',
     'Observability',
@@ -29,8 +30,9 @@ test('docs page renders all sections from the live OpenAPI spec', async ({ page 
   await expect(page.getByText('/api/transactions/{id}', { exact: true })).toBeVisible();
   await expect(page.getByText('/api/chat', { exact: true })).toBeVisible();
 
-  // Chat endpoint shows the preview status
-  await expect(page.getByText('Design preview').first()).toBeVisible();
+  // SQL schema section renders real DDL
+  await expect(page.getByText('CREATE TABLE "Transactions"').first()).toBeVisible();
+  await expect(page.getByText('IX_Transactions_Status_TransactionDate').first()).toBeVisible();
 
   // All 6 design decisions render
   for (let i = 1; i <= 6; i++) {

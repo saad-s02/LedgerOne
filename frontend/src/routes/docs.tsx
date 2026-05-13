@@ -19,6 +19,7 @@ const SECTIONS: SidebarSection[] = [
   { id: 'authentication', label: 'Authentication' },
   { id: 'endpoints', label: 'Endpoints' },
   { id: 'data-model', label: 'Data model' },
+  { id: 'sql-schema', label: 'SQL schema' },
   { id: 'design-decisions', label: 'Design decisions' },
   { id: 'scale', label: 'Scale considerations' },
   { id: 'observability', label: 'Observability' },
@@ -75,6 +76,7 @@ function DocsPage() {
         <Authentication />
         <Endpoints operationsByTag={operationsByTag} spec={spec} />
         <DataModel />
+        <SqlSchema />
         <DesignDecisions />
         <ScaleConsiderations />
         <Observability />
@@ -305,6 +307,86 @@ function DataModel() {
             </li>
           </ul>
         </div>
+      </div>
+    </section>
+  );
+}
+
+const SCHEMA_DDL = `CREATE TABLE "Transactions" (
+    "Id"              INTEGER       NOT NULL CONSTRAINT "PK_Transactions" PRIMARY KEY AUTOINCREMENT,
+    "TransactionDate" TEXT          NOT NULL,
+    "AccountId"       TEXT          NOT NULL,   -- max length 32 (EF model)
+    "AdvisorName"     TEXT          NOT NULL,   -- max length 128 (EF model)
+    "Type"            INTEGER       NOT NULL,   -- 0 Buy, 1 Sell, 2 Fee, 3 Transfer, 4 Dividend
+    "SecuritySymbol"  TEXT              NULL,   -- max length 16
+    "Amount"          TEXT          NOT NULL,   -- decimal(18,2) — SQLite stores as TEXT
+    "Currency"        INTEGER       NOT NULL,   -- 0 CAD, 1 USD
+    "Status"          INTEGER       NOT NULL,   -- 0 Pending, 1 Settled, 2 Cancelled
+    "Notes"           TEXT              NULL,
+    "CreatedAt"       TEXT          NOT NULL
+);
+
+CREATE INDEX "IX_Transactions_AccountId"
+    ON "Transactions" ("AccountId");
+
+CREATE INDEX "IX_Transactions_Status_TransactionDate"
+    ON "Transactions" ("Status" ASC, "TransactionDate" DESC);
+`;
+
+const MIGRATIONS: { name: string; date: string; note: string }[] = [
+  {
+    name: '20260512204448_InitialCreate',
+    date: '2026-05-12',
+    note: 'Transactions table + IX_Transactions_AccountId + IX_Transactions_Status_TransactionDate.',
+  },
+  {
+    name: '20260513022707_AddNotesMaxLength',
+    date: '2026-05-13',
+    note: 'Model-level MaxLength on Notes — no DDL change (SQLite ignores TEXT length).',
+  },
+];
+
+function SqlSchema() {
+  return (
+    <section className="space-y-4">
+      <SectionHeader
+        id="sql-schema"
+        title="SQL schema"
+        description="The actual DDL EF Core emits for SQLite. Decimals and dates land as TEXT — SQLite's idiomatic storage class for them; enums round-trip as INTEGER. EF migrations are the source of truth; this view is for reviewers who want to see the schema without running the project."
+      />
+      <div className="rounded-lg border border-line bg-bg-elev p-5 space-y-4">
+        <h4 className="text-sm font-semibold text-text-bright">Tables &amp; indexes</h4>
+        <pre className="overflow-x-auto rounded border border-line bg-bg p-4 font-mono text-[12px] leading-relaxed text-text">
+          <code>{SCHEMA_DDL}</code>
+        </pre>
+        <p className="text-xs text-text-dim">
+          In production on SQL Server the same EF model emits{' '}
+          <code className="font-mono">nvarchar</code>, <code className="font-mono">datetime2</code>,
+          and a real <code className="font-mono">decimal(18,2)</code> — no per-row type negotiation.
+          The index definitions and column order are unchanged.
+        </p>
+      </div>
+      <div className="rounded-lg border border-line bg-bg-elev p-5 space-y-3">
+        <h4 className="text-sm font-semibold text-text-bright">Migrations</h4>
+        <p className="text-xs text-text-dim">
+          Schema evolution is tracked via real EF migrations, not{' '}
+          <code className="font-mono">EnsureCreated</code> — reproducible across environments and
+          reviewable as code.
+        </p>
+        <ul className="space-y-2">
+          {MIGRATIONS.map((m) => (
+            <li
+              key={m.name}
+              className="flex flex-col gap-1 rounded border border-line bg-bg p-3 sm:flex-row sm:items-baseline sm:gap-4"
+            >
+              <code className="shrink-0 font-mono text-xs text-text-bright">{m.name}</code>
+              <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-text-dim">
+                {m.date}
+              </span>
+              <span className="text-xs text-text">{m.note}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

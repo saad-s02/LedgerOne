@@ -114,3 +114,35 @@ The dashboard ships in three layers, all on this branch:
 See `docs/superpowers/specs/2026-05-12-investment-dashboard-foundation-design.md`
 and `docs/superpowers/plans/2026-05-12-investment-dashboard-foundation.md` for the
 full design and implementation plan.
+
+## Assumptions
+
+- **Single tenant, no auth.** Every request sees every row. Production would add a `TenantId` discriminator and JWT-bearer auth before anything else.
+- **Read-only AI agent.** The chat tools only call list/get handlers — no writes, no aggregates, no DB-direct access.
+- **Denormalized `AdvisorName`.** Stored on every transaction rather than referenced via FK; works at 8K rows, would need a real Advisors table at scale.
+- **Offset pagination.** Fine for this dataset; cursor/keyset would be needed for deep scrolling at production volumes.
+
+## Tradeoffs
+
+- **SQLite, not SQL Server.** Picked for zero-setup portability. EF Core abstracts the dialect, so the schema migrates cleanly to SQL Server in production.
+- **Real migrations, not `EnsureCreated`.** Slower to scaffold but the schema is reproducible and reviewable (`backend/LedgerOne.Api/Data/Migrations/`).
+- **Two composite indexes only** — `(Status, TransactionDate DESC)` and `(AccountId)`. Indexing every filter column would amplify writes; these cover the dominant access patterns from the PRD.
+- **Agent tools call handlers in-process, not over HTTP.** Avoids serialization overhead while keeping a single source of truth (`Features/Chat/TransactionTools.cs`).
+- **Haiku 4.5 over Sonnet 4.6 / GPT-4o.** Three well-described tools over a tabular dataset is the structured tool-routing task Haiku is tuned for — ~3× cheaper, ~2× faster. Model id lives in `appsettings.json:Chat:Model` and is swappable.
+
+See `PRD.md` §11 ("Tradeoffs") and §12 ("Scale Considerations") for the long-form discussion.
+
+## Future improvements
+
+In rough priority order:
+
+1. **Auth and tenant scoping** — table-stakes for production.
+2. **Cursor pagination** on the list endpoint for deep scrolling.
+3. **`aggregate_transactions` tool** — sums, counts, group-by for the agent.
+4. **Streaming chat responses** (SSE) — current shape is one-shot.
+5. **Rate limiting** on `/api/chat` plus a token/cost observability dashboard.
+6. **Eval harness** for agent query accuracy (golden questions → expected tool calls).
+7. **Saved filter presets** on the list view.
+8. **Anomaly detection** that auto-surfaces unusual transactions.
+
+See `PRD.md` §15 ("Future Improvements") for the full backlog.
