@@ -1,3 +1,4 @@
+using LedgerOne.Api.Infrastructure.Errors;
 using LedgerOne.Api.Infrastructure.Validation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -24,6 +25,22 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
             };
             problem.Extensions["traceId"] = httpContext.TraceIdentifier;
             httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+            httpContext.Response.ContentType = "application/problem+json";
+            await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+            return true;
+        }
+
+        if (exception is NotFoundException nf)
+        {
+            var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
+            {
+                Type = "about:blank",
+                Title = "Resource not found.",
+                Status = StatusCodes.Status404NotFound,
+                Detail = nf.Message,
+            };
+            problem.Extensions["traceId"] = httpContext.TraceIdentifier;
+            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             httpContext.Response.ContentType = "application/problem+json";
             await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
             return true;
