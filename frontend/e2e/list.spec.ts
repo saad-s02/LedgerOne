@@ -98,3 +98,10 @@ test('status pill renders with semantic color class', async ({ page }) => {
   await expect(pill).toBeVisible();
   await expect(pill).toHaveClass(/bg-(green|yellow|red)-100/);
 });
+
+test('Type filter updates URL and reduces rows to matching only', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Type').selectOption('Buy');
+  await expect(page).toHaveURL(/[?&]type=Buy(&|$)/);
+  await expect(page.locator('tbody tr')).toHaveCount(12);
+});

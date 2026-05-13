@@ -4,6 +4,7 @@ import { fetchTransactions, transactionsKey } from '../api/transactions';
 import { listSearchSchema } from '../lib/listSearch';
 import { StatusPill } from '../components/StatusPill';
 import { SkeletonRows } from '../components/SkeletonRows';
+import { FilterBar } from '../components/FilterBar';
 
 export const Route = createFileRoute('/')({
   validateSearch: listSearchSchema.parse,
@@ -21,6 +22,14 @@ function ListPage() {
 
   return (
     <div>
+      <FilterBar
+        value={search}
+        onChange={(next) =>
+          navigate({
+            search: (prev) => ({ ...prev, ...next, page: 1 }),
+          })
+        }
+      />
       {isError ? (
         <div className="rounded border border-red-300 bg-red-50 p-4 text-red-800">
           <div className="mb-2 font-medium">Couldn't load transactions</div>
