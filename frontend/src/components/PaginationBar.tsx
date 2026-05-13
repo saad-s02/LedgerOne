@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { Button } from './Button';
+import { useReducedMotion } from '../lib/useReducedMotion';
 
 interface Props {
   page: number;
@@ -10,8 +11,23 @@ interface Props {
 }
 
 export function PaginationBar({ page, totalPages, pageSize, total, onPage }: Props) {
+  const reduced = useReducedMotion();
   const startIdx = (page - 1) * pageSize + 1;
   const endIdx = Math.min(page * pageSize, total);
+
+  const motionProps = reduced
+    ? {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.1 },
+      }
+    : {
+        initial: { opacity: 0, x: 12 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: -12 },
+        transition: { duration: 0.28, ease: [0.32, 0.72, 0, 1] },
+      };
 
   return (
     <div className="mt-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.08em] text-text-dim">
@@ -29,14 +45,7 @@ export function PaginationBar({ page, totalPages, pageSize, total, onPage }: Pro
         <span className="text-text-bright">
           Page{' '}
           <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={page}
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -12 }}
-              transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-              className="inline-block tabular-nums"
-            >
+            <motion.span key={page} {...motionProps} className="inline-block tabular-nums">
               {page}
             </motion.span>
           </AnimatePresence>{' '}
