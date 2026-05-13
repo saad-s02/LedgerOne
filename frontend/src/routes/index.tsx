@@ -1,26 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 import { fetchTransactions, transactionsKey } from '../api/transactions';
-
-const searchSchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-});
+import { listSearchSchema } from '../lib/listSearch';
 
 export const Route = createFileRoute('/')({
-  validateSearch: searchSchema.parse,
+  validateSearch: listSearchSchema.parse,
   component: ListPage,
 });
 
-const PAGE_SIZE = 25;
-
 function ListPage() {
-  const { page } = Route.useSearch();
+  const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
   const { data, isPending, isError, refetch } = useQuery({
-    queryKey: transactionsKey({ page, pageSize: PAGE_SIZE }),
-    queryFn: ({ signal }) => fetchTransactions({ page, pageSize: PAGE_SIZE }, signal),
+    queryKey: transactionsKey(search),
+    queryFn: ({ signal }) => fetchTransactions(search, signal),
   });
 
   if (isPending) return <div className="text-gray-600">Loading…</div>;

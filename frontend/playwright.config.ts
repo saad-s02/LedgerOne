@@ -15,9 +15,12 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command:
-        'cd ../backend && ASPNETCORE_ENVIRONMENT=Testing ASPNETCORE_URLS=http://localhost:5000 dotnet run --project LedgerOne.Api --no-launch-profile',
+      command: 'dotnet run --project ../backend/LedgerOne.Api --no-launch-profile',
       url: `${apiUrl}/health`,
+      env: {
+        ASPNETCORE_ENVIRONMENT: 'Testing',
+        ASPNETCORE_URLS: apiUrl,
+      },
       reuseExistingServer: !process.env.CI,
       timeout: 90_000,
       stdout: 'pipe',
