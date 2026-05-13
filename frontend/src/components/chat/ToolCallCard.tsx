@@ -14,29 +14,29 @@ function summarizeArgs(tool: string, args: Record<string, unknown>): string {
 
 export function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
   const borderClass = toolCall.isError
-    ? 'border-red-300 bg-red-50'
-    : 'border-slate-200 bg-slate-50';
+    ? 'border-rose-500/40 bg-rose-500/[0.05]'
+    : 'border-line bg-bg-elev';
 
   return (
     <details
       data-testid="tool-call-card"
       data-tool={toolCall.tool}
       data-error={toolCall.isError ? 'true' : 'false'}
-      className={`rounded border ${borderClass} p-2 text-sm`}
+      className={`rounded-[3px] border ${borderClass} p-2 font-mono text-[11px] text-text`}
     >
-      <summary className="cursor-pointer select-none font-medium">
+      <summary className="cursor-pointer select-none font-medium text-text-bright">
         {summarizeArgs(toolCall.tool, toolCall.args) || `🛠 ${toolCall.tool}`}
       </summary>
       <div className="mt-2 space-y-2">
         <div>
-          <div className="text-xs uppercase text-slate-500">Arguments</div>
-          <pre className="overflow-x-auto font-mono text-xs">
+          <div className="text-[9px] uppercase tracking-[0.1em] text-text-dim">Arguments</div>
+          <pre className="overflow-x-auto text-[10px] text-text">
             {JSON.stringify(toolCall.args, null, 2)}
           </pre>
         </div>
         <div>
-          <div className="text-xs uppercase text-slate-500">Result</div>
-          <pre className="overflow-x-auto font-mono text-xs">
+          <div className="text-[9px] uppercase tracking-[0.1em] text-text-dim">Result</div>
+          <pre className="overflow-x-auto text-[10px] text-text">
             {JSON.stringify(toolCall.result, null, 2)}
           </pre>
         </div>
