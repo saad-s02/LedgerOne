@@ -46,4 +46,22 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
         var json = await client.GetStringAsync("/api/transactions", ct);
         await Verify(json).UseDirectory("Snapshots");
     }
+
+    [Fact]
+    public async Task Get_Transactions_SortByAmountDesc_ReturnsLargestFirst()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        var response = await client.GetAsync("/api/transactions?sortBy=amount&sortDir=desc", ct);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var envelope = await response.Content.ReadFromJsonAsync<ListTransactionsResponse>(JsonOptions, ct);
+        envelope.Should().NotBeNull();
+        envelope!.Data.Should().HaveCountGreaterThan(1);
+        envelope.Data
+            .Zip(envelope.Data.Skip(1), (a, b) => a.Amount >= b.Amount)
+            .Should().AllSatisfy(ordered => ordered.Should().BeTrue());
+    }
 }
