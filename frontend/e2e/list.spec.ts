@@ -112,3 +112,16 @@ test('Status filter updates URL and reduces rows to matching only', async ({ pag
   await expect(page).toHaveURL(/[?&]status=Pending(&|$)/);
   await expect(page.locator('tbody tr')).toHaveCount(20);
 });
+
+test('Sort dropdown changes URL and reorders rows by amount desc', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Sort').selectOption('amount:desc');
+  await expect(page).toHaveURL(/[?&]sortBy=amount(&|$)/);
+  await expect(page).toHaveURL(/[?&]sortDir=desc(&|$)/);
+  await expect(page.locator('tbody tr[data-testid="skeleton-row"]')).toHaveCount(0);
+
+  const firstAmount = await page.locator('tbody tr').first().locator('td').nth(5).textContent();
+  const secondAmount = await page.locator('tbody tr').nth(1).locator('td').nth(5).textContent();
+  const parse = (s: string | null) => parseFloat((s ?? '').replace(/[^\d.]/g, ''));
+  expect(parse(firstAmount)).toBeGreaterThanOrEqual(parse(secondAmount));
+});

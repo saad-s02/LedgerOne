@@ -64,6 +64,25 @@ export function FilterBar({ value, onChange }: Props) {
           onChange={(e) => onChange({ toDate: e.target.value || undefined })}
         />
       </label>
+      <label className="flex flex-col text-xs text-gray-600">
+        <span>Sort</span>
+        <select
+          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          value={`${value.sortBy}:${value.sortDir}`}
+          onChange={(e) => {
+            const [sortBy, sortDir] = e.target.value.split(':') as [
+              'date' | 'amount',
+              'asc' | 'desc',
+            ];
+            onChange({ sortBy, sortDir });
+          }}
+        >
+          <option value="date:desc">Date (newest)</option>
+          <option value="date:asc">Date (oldest)</option>
+          <option value="amount:desc">Amount (high to low)</option>
+          <option value="amount:asc">Amount (low to high)</option>
+        </select>
+      </label>
     </div>
   );
 }
