@@ -33,3 +33,6 @@ test-results/
 
 # Verify
 *.received.txt
+
+# Superpowers brainstorm sessions
+.superpowers/
