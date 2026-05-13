@@ -46,8 +46,10 @@ public class ListTransactionsHandler(
 
     private static IQueryable<Transaction> BuildQuery(IQueryable<Transaction> query, ListTransactionsRequest req)
     {
-        if (req.Type.HasValue)   query = query.Where(t => t.Type == req.Type.Value);
-        if (req.Status.HasValue) query = query.Where(t => t.Status == req.Status.Value);
+        if (req.Type.HasValue)     query = query.Where(t => t.Type == req.Type.Value);
+        if (req.Status.HasValue)   query = query.Where(t => t.Status == req.Status.Value);
+        if (req.FromDate.HasValue) query = query.Where(t => t.TransactionDate >= req.FromDate.Value);
+        if (req.ToDate.HasValue)   query = query.Where(t => t.TransactionDate <= req.ToDate.Value);
         return query;
     }
 }

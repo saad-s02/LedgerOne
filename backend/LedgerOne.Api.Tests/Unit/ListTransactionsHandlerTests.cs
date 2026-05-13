@@ -284,4 +284,54 @@ public class ListTransactionsHandlerTests : IDisposable
         response.Total.Should().Be(2);
         response.Data.Select(d => d.Status).Should().AllSatisfy(s => s.Should().Be(TransactionStatus.Pending));
     }
+
+    [Fact]
+    public async Task Handle_FilterByFromDate_ReturnsOnlyRowsOnOrAfterCutoff()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "OLD", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "NEW", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { FromDate = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc) },
+            ct);
+
+        response.Total.Should().Be(1);
+        response.Data.Single().AccountId.Should().Be("NEW");
+    }
+
+    [Fact]
+    public async Task Handle_FilterByToDate_ReturnsOnlyRowsOnOrBeforeCutoff()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _db.Transactions.AddRange(
+            new Transaction { TransactionDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "OLD", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow },
+            new Transaction { TransactionDate = new DateTime(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc), AccountId = "NEW", AdvisorName = "x", Type = TransactionType.Buy, Amount = 1, Currency = Currency.CAD, Status = TransactionStatus.Settled, CreatedAt = DateTime.UtcNow });
+        _db.SaveChanges();
+
+        var response = await _sut.Handle(
+            new ListTransactionsRequest { ToDate = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc) },
+            ct);
+
+        response.Total.Should().Be(1);
+        response.Data.Single().AccountId.Should().Be("OLD");
+    }
+
+    [Fact]
+    public async Task Handle_FromDateAfterToDate_ThrowsValidationException_WithDateRangeKey()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var act = () => _sut.Handle(
+            new ListTransactionsRequest
+            {
+                FromDate = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+                ToDate   = new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+            },
+            ct);
+
+        var ex = await act.Should().ThrowAsync<LedgerOne.Api.Infrastructure.Validation.ValidationException>();
+        ex.Which.Errors.Should().ContainKey("dateRange");
+    }
 }

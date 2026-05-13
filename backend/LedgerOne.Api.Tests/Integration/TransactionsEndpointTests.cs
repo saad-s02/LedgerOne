@@ -48,6 +48,21 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task Get_Transactions_FromDateAfterToDate_Returns400ProblemDetails()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync(
+            "/api/transactions?fromDate=2026-05-01T00:00:00Z&toDate=2026-04-01T00:00:00Z",
+            ct);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync(ct);
+        body.Should().Contain("dateRange");
+    }
+
+    [Fact]
     public async Task Get_Transactions_FilterByStatus_ReturnsOnlyMatchingRows()
     {
         var ct = TestContext.Current.CancellationToken;
