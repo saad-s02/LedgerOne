@@ -9,8 +9,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 const VARIANTS: Record<Variant, string> = {
   ghost:
     'border-line-strong bg-bg-elev text-text hover:border-cyan hover:text-cyan hover:shadow-[0_0_0_3px_var(--color-cyan-glow)]',
-  primary:
-    'border-cyan bg-cyan/10 text-cyan hover:bg-cyan/15',
+  primary: 'border-cyan bg-cyan/10 text-cyan hover:bg-cyan/15',
 };
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(

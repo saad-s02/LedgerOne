@@ -34,7 +34,9 @@ test('docs page renders all sections from the live OpenAPI spec', async ({ page 
 
   // All 6 design decisions render
   for (let i = 1; i <= 6; i++) {
-    await expect(page.getByRole('heading', { level: 3 }).filter({ hasText: getDecisionTitle(i) })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 3 }).filter({ hasText: getDecisionTitle(i) }),
+    ).toBeVisible();
   }
 });
 

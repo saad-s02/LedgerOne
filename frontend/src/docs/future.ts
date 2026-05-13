@@ -18,7 +18,7 @@ export const FUTURE_IMPROVEMENTS: FutureItem[] = [
   {
     rank: 3,
     title: 'Aggregate endpoints for advisor and account rollups',
-    body: 'GET /api/advisors/{id}/summary returning totals, counts, status breakdown. The chat agent\'s aggregate_transactions tool calls this once it exists.',
+    body: "GET /api/advisors/{id}/summary returning totals, counts, status breakdown. The chat agent's aggregate_transactions tool calls this once it exists.",
   },
   {
     rank: 4,

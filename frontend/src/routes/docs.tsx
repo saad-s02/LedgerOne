@@ -33,7 +33,12 @@ interface OperationEntry {
 }
 
 function DocsPage() {
-  const { data: spec, isPending, isError, error } = useQuery({
+  const {
+    data: spec,
+    isPending,
+    isError,
+    error,
+  } = useQuery({
     queryKey: openApiKey,
     queryFn: ({ signal }) => fetchOpenApiSpec(signal),
     staleTime: 60_000,
@@ -45,7 +50,8 @@ function DocsPage() {
   if (isError) {
     return (
       <div className="rounded border border-rose-500/40 bg-rose-500/[0.05] p-4 text-sm text-rose-200">
-        Couldn&apos;t load /openapi/v1.json: {error instanceof Error ? error.message : String(error)}
+        Couldn&apos;t load /openapi/v1.json:{' '}
+        {error instanceof Error ? error.message : String(error)}
         <div className="mt-2 text-xs text-rose-300">
           Is the backend running on{' '}
           <code className="font-mono">
@@ -91,7 +97,10 @@ function flattenOperations(spec: OpenApiDocument): OperationEntry[] {
   return out;
 }
 
-function groupByTag(operations: OperationEntry[], tagOrder: { name: string }[]): Map<string, OperationEntry[]> {
+function groupByTag(
+  operations: OperationEntry[],
+  tagOrder: { name: string }[],
+): Map<string, OperationEntry[]> {
   const groups = new Map<string, OperationEntry[]>();
   for (const op of operations) {
     const list = groups.get(op.tag) ?? [];
@@ -123,10 +132,16 @@ function SectionHeader({
   return (
     <header id={id} className="scroll-mt-6">
       {eyebrow && (
-        <div className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan">{eyebrow}</div>
+        <div className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan">
+          {eyebrow}
+        </div>
       )}
-      <h2 className="font-mono text-[18px] font-semibold uppercase tracking-[0.1em] text-text-bright">{title}</h2>
-      {description && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-dim">{description}</p>}
+      <h2 className="font-mono text-[18px] font-semibold uppercase tracking-[0.1em] text-text-bright">
+        {title}
+      </h2>
+      {description && (
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-dim">{description}</p>
+      )}
     </header>
   );
 }
@@ -149,8 +164,7 @@ function Overview({ spec, operationCount }: { spec: OpenApiDocument; operationCo
       </div>
       {spec.info.contact?.email && (
         <p className="text-xs text-text-dim">
-          Contact: {spec.info.contact.name}{' '}
-          &lt;
+          Contact: {spec.info.contact.name} &lt;
           <a className="text-cyan hover:underline" href={`mailto:${spec.info.contact.email}`}>
             {spec.info.contact.email}
           </a>
@@ -165,7 +179,9 @@ function Stat({ label, value, mono }: { label: string; value: string; mono?: boo
   return (
     <div className="rounded-lg border border-line bg-bg-elev p-3">
       <div className="text-xs uppercase tracking-wider text-text-dim">{label}</div>
-      <div className={'mt-1 text-sm font-semibold text-text-bright ' + (mono ? 'font-mono' : '')}>{value}</div>
+      <div className={'mt-1 text-sm font-semibold text-text-bright ' + (mono ? 'font-mono' : '')}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -176,13 +192,14 @@ function Authentication() {
       <SectionHeader id="authentication" title="Authentication" />
       <div className="rounded-lg border border-line bg-bg-elev p-5">
         <p className="text-sm leading-relaxed text-text">
-          The prototype runs single-tenant and does not authenticate requests. The dashboard, the agent, and any direct
-          API consumer all see the same data.
+          The prototype runs single-tenant and does not authenticate requests. The dashboard, the
+          agent, and any direct API consumer all see the same data.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-text">
-          For production: JWT bearer tokens at the gateway, tenant claim extracted at the controller boundary, and an EF
-          Core global query filter that pins every query to <code className="font-mono text-xs">WHERE TenantId = @currentTenant</code>.
-          The chat endpoint additionally needs rate limiting and prompt-injection guardrails. See{' '}
+          For production: JWT bearer tokens at the gateway, tenant claim extracted at the controller
+          boundary, and an EF Core global query filter that pins every query to{' '}
+          <code className="font-mono text-xs">WHERE TenantId = @currentTenant</code>. The chat
+          endpoint additionally needs rate limiting and prompt-injection guardrails. See{' '}
           <a className="text-cyan hover:underline" href="#decision-no-multi-tenant">
             Decision #4 — No multi-tenant model
           </a>
@@ -230,7 +247,11 @@ function Endpoints({
 function DataModel() {
   const transactionFields: { field: string; type: string; notes: string }[] = [
     { field: 'Id', type: 'int', notes: 'Primary key, identity' },
-    { field: 'TransactionDate', type: 'datetime', notes: 'Indexed via composite (Status, Date DESC)' },
+    {
+      field: 'TransactionDate',
+      type: 'datetime',
+      notes: 'Indexed via composite (Status, Date DESC)',
+    },
     { field: 'AccountId', type: 'string', notes: 'ACCT-NNNNN; secondary index' },
     { field: 'AdvisorName', type: 'string', notes: 'Denormalized — see Decision #3' },
     { field: 'Type', type: 'enum', notes: 'Buy, Sell, Fee, Transfer, Dividend' },
@@ -275,12 +296,12 @@ function DataModel() {
           <ul className="list-inside list-disc space-y-1 text-sm text-text">
             <li>
               <code className="font-mono text-xs">IX_Transactions_Status_Date</code> — composite on{' '}
-              <code className="font-mono text-xs">(Status, TransactionDate DESC)</code>. Serves &quot;recent pending&quot; and
-              &quot;recent settled&quot; without a sort step.
+              <code className="font-mono text-xs">(Status, TransactionDate DESC)</code>. Serves
+              &quot;recent pending&quot; and &quot;recent settled&quot; without a sort step.
             </li>
             <li>
-              <code className="font-mono text-xs">IX_Transactions_AccountId</code> — single column. Supports account
-              drill-downs from the agent and direct API consumers.
+              <code className="font-mono text-xs">IX_Transactions_AccountId</code> — single column.
+              Supports account drill-downs from the agent and direct API consumers.
             </li>
           </ul>
         </div>

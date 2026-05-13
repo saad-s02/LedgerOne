@@ -17,7 +17,12 @@ test('list page loads and shows table with rows', async ({ page }) => {
 
 test('Next button advances to page 2 and updates URL', async ({ page }) => {
   await page.goto('/');
-  const firstRowAccount = await page.locator('tbody tr[role="button"]').first().locator('td').nth(1).textContent();
+  const firstRowAccount = await page
+    .locator('tbody tr[role="button"]')
+    .first()
+    .locator('td')
+    .nth(1)
+    .textContent();
 
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page).toHaveURL(/[?&]page=2(&|$)/);
@@ -101,14 +106,20 @@ test('status pill renders with semantic color class', async ({ page }) => {
 
 test('Type filter updates URL and reduces rows to matching only', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('group', { name: 'Type' }).getByRole('button', { name: 'Buy', exact: true }).click();
+  await page
+    .getByRole('group', { name: 'Type' })
+    .getByRole('button', { name: 'Buy', exact: true })
+    .click();
   await expect(page).toHaveURL(/[?&]type=Buy(&|$)/);
   await expect(page.locator('tbody tr[role="button"]')).toHaveCount(12);
 });
 
 test('Status filter updates URL and reduces rows to matching only', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('group', { name: 'Status' }).getByRole('button', { name: 'Pending', exact: true }).click();
+  await page
+    .getByRole('group', { name: 'Status' })
+    .getByRole('button', { name: 'Pending', exact: true })
+    .click();
   await expect(page).toHaveURL(/[?&]status=Pending(&|$)/);
   await expect(page.locator('tbody tr[role="button"]')).toHaveCount(20);
 });
@@ -120,8 +131,18 @@ test('Sort header click changes URL and reorders rows by amount desc', async ({ 
   await expect(page).toHaveURL(/[?&]sortDir=desc(&|$)/);
   await expect(page.locator('tbody tr[data-testid="skeleton-row"]')).toHaveCount(0);
 
-  const firstAmount = await page.locator('tbody tr[role="button"]').first().locator('td').nth(5).textContent();
-  const secondAmount = await page.locator('tbody tr[role="button"]').nth(1).locator('td').nth(5).textContent();
+  const firstAmount = await page
+    .locator('tbody tr[role="button"]')
+    .first()
+    .locator('td')
+    .nth(5)
+    .textContent();
+  const secondAmount = await page
+    .locator('tbody tr[role="button"]')
+    .nth(1)
+    .locator('td')
+    .nth(5)
+    .textContent();
   const parse = (s: string | null) => parseFloat((s ?? '').replace(/[^\d.]/g, ''));
   expect(parse(firstAmount)).toBeGreaterThanOrEqual(parse(secondAmount));
 });
@@ -150,14 +171,20 @@ test('changing a filter from page=2 returns to page=1', async ({ page }) => {
   await page.goto('/?page=2');
   await expect(page.getByText(/Page\s+2\s*of\s*3/i)).toBeVisible();
 
-  await page.getByRole('group', { name: 'Type' }).getByRole('button', { name: 'Buy', exact: true }).click();
+  await page
+    .getByRole('group', { name: 'Type' })
+    .getByRole('button', { name: 'Buy', exact: true })
+    .click();
 
   await expect(page).toHaveURL(/[?&]page=1(&|$)/);
 });
 
 test('empty state with active filter offers Clear Filters that restores rows', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('group', { name: 'Type' }).getByRole('button', { name: 'Buy', exact: true }).click();
+  await page
+    .getByRole('group', { name: 'Type' })
+    .getByRole('button', { name: 'Buy', exact: true })
+    .click();
   await page.getByLabel('Search').fill('zzzzz-not-found');
   await expect(page).toHaveURL(/[?&]search=zzzzz-not-found(&|$)/, { timeout: 2000 });
 

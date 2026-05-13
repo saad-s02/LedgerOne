@@ -26,11 +26,7 @@ function pointsFor(seed: number): string {
 
 export function Sparkline({ seed, tone = 'neutral' }: Props) {
   return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 38 14"
-      className="inline-block h-3.5 w-[38px] opacity-60"
-    >
+    <svg aria-hidden="true" viewBox="0 0 38 14" className="inline-block h-3.5 w-[38px] opacity-60">
       <polyline fill="none" stroke={TONE_STROKE[tone]} strokeWidth="1" points={pointsFor(seed)} />
     </svg>
   );

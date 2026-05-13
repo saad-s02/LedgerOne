@@ -35,11 +35,7 @@ export function PaginationBar({ page, totalPages, pageSize, total, onPage }: Pro
         Showing {startIdx.toLocaleString()}–{endIdx.toLocaleString()} of {total.toLocaleString()}
       </span>
       <div className="flex items-center gap-3">
-        <Button
-          aria-label="Prev"
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-        >
+        <Button aria-label="Prev" disabled={page <= 1} onClick={() => onPage(page - 1)}>
           ‹ Prev
         </Button>
         <span className="text-text-bright">
@@ -51,11 +47,7 @@ export function PaginationBar({ page, totalPages, pageSize, total, onPage }: Pro
           </AnimatePresence>{' '}
           of {totalPages}
         </span>
-        <Button
-          aria-label="Next"
-          disabled={page >= totalPages}
-          onClick={() => onPage(page + 1)}
-        >
+        <Button aria-label="Next" disabled={page >= totalPages} onClick={() => onPage(page + 1)}>
           Next ›
         </Button>
       </div>

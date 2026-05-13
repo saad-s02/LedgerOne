@@ -37,7 +37,8 @@ export const OVERLAY: Overlay = {
       references: [],
     },
     Test_Clear: {
-      summary: 'Testing-only. Wipes every transaction without seeding. Returns 404 outside the Testing environment.',
+      summary:
+        'Testing-only. Wipes every transaction without seeding. Returns 404 outside the Testing environment.',
       references: [],
     },
     Test_Boom: {

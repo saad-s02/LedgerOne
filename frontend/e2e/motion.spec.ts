@@ -22,7 +22,10 @@ test('motion infrastructure is present', async ({ page }) => {
 
 test('active filter chip is annotated as bordered', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('group', { name: 'Type' }).getByRole('button', { name: 'Buy', exact: true }).click();
+  await page
+    .getByRole('group', { name: 'Type' })
+    .getByRole('button', { name: 'Buy', exact: true })
+    .click();
   const buyChip = page.getByTestId('type-chip-Buy');
   await expect(buyChip).toHaveAttribute('data-motion-state', 'border');
 });
@@ -48,9 +51,9 @@ test('reduced motion suppresses ambient loops and counter animation', async ({ p
     // still on the element but the animation duration is 0.
     // Assert that no Pending pill has a running animation in computed style.
     for (let i = 0; i < count; i += 1) {
-      const duration = await pendingPills.nth(i).evaluate(
-        (el) => getComputedStyle(el).animationDuration,
-      );
+      const duration = await pendingPills
+        .nth(i)
+        .evaluate((el) => getComputedStyle(el).animationDuration);
       expect(duration).toBe('0s');
     }
   }

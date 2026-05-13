@@ -44,8 +44,7 @@ function SortIndicator({ active, dir }: { active: boolean; dir: SortDirection })
 export function DataTable({ sortBy, sortDir, onSort, children }: Props) {
   const handleHeaderClick = (col: Column) => {
     if (!col.sortable) return;
-    const nextDir: SortDirection =
-      sortBy === col.sortable && sortDir === 'desc' ? 'asc' : 'desc';
+    const nextDir: SortDirection = sortBy === col.sortable && sortDir === 'desc' ? 'asc' : 'desc';
     onSort({ sortBy: col.sortable, sortDir: nextDir });
   };
 
@@ -61,9 +60,7 @@ export function DataTable({ sortBy, sortDir, onSort, children }: Props) {
                 key={col.key}
                 scope="col"
                 role="columnheader"
-                aria-sort={
-                  active ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined
-                }
+                aria-sort={active ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                 onClick={interactive ? () => handleHeaderClick(col) : undefined}
                 className={[
                   'px-3.5 py-2.5 font-mono text-[10px] uppercase tracking-[0.1em] text-text-dim',

@@ -90,7 +90,10 @@ export async function fetchOpenApiSpec(signal?: AbortSignal): Promise<OpenApiDoc
   return (await res.json()) as OpenApiDocument;
 }
 
-export function resolveRef<T>(spec: OpenApiDocument, schema: OpenApiSchema | undefined): T | undefined {
+export function resolveRef<T>(
+  spec: OpenApiDocument,
+  schema: OpenApiSchema | undefined,
+): T | undefined {
   if (!schema?.$ref) return schema as T | undefined;
   // Refs look like #/components/schemas/Foo
   const parts = schema.$ref.replace(/^#\//, '').split('/');

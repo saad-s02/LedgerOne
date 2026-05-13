@@ -11,7 +11,11 @@ export function SchemaTable({ spec, schema }: Props) {
   if (!resolved) return <div className="text-sm text-text-dim">No schema.</div>;
   const props = resolved.properties;
   if (!props) {
-    return <pre className="rounded bg-bg-elev p-3 text-xs text-text">{describeSchema(spec, resolved)}</pre>;
+    return (
+      <pre className="rounded bg-bg-elev p-3 text-xs text-text">
+        {describeSchema(spec, resolved)}
+      </pre>
+    );
   }
   const required = new Set(resolved.required ?? []);
   return (

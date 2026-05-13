@@ -8,10 +8,9 @@ export function useTotalTransactionsCount() {
   return useQuery({
     queryKey: TOTAL_KEY,
     queryFn: ({ signal }) =>
-      fetchTransactions(
-        { page: 1, pageSize: 1, sortBy: 'date', sortDir: 'desc' },
-        signal,
-      ).then((r) => r.total),
+      fetchTransactions({ page: 1, pageSize: 1, sortBy: 'date', sortDir: 'desc' }, signal).then(
+        (r) => r.total,
+      ),
     staleTime: 60_000,
   });
 }

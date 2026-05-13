@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import type { HttpMethod, OpenApiDocument, OpenApiOperation, OpenApiParameter } from '../../api/openapi';
+import type {
+  HttpMethod,
+  OpenApiDocument,
+  OpenApiOperation,
+  OpenApiParameter,
+} from '../../api/openapi';
 import { apiBaseUrl, resolveRef } from '../../api/openapi';
 import { StatusBadge } from './MethodBadge';
 
@@ -116,7 +121,9 @@ export function TryItPanel({ method, path, operation, spec, disabled, disabledRe
         >
           {loading ? 'Sending…' : 'Send request'}
         </button>
-        {disabled && disabledReason && <span className="text-xs text-text-dim">{disabledReason}</span>}
+        {disabled && disabledReason && (
+          <span className="text-xs text-text-dim">{disabledReason}</span>
+        )}
       </div>
 
       {result && (
@@ -210,7 +217,11 @@ function defaultParamValues(parameters: OpenApiParameter[]): Record<string, stri
   return out;
 }
 
-function buildPath(template: string, parameters: OpenApiParameter[], values: Record<string, string>): string {
+function buildPath(
+  template: string,
+  parameters: OpenApiParameter[],
+  values: Record<string, string>,
+): string {
   let out = template;
   for (const p of parameters.filter((x) => x.in === 'path')) {
     const v = values[p.name] ?? '';
@@ -236,7 +247,10 @@ function defaultRequestBody(spec: OpenApiDocument, operation: OpenApiOperation):
   return JSON.stringify(sampleFromSchema(spec, resolved), null, 2);
 }
 
-function sampleFromSchema(spec: OpenApiDocument, schema: import('../../api/openapi').OpenApiSchema): unknown {
+function sampleFromSchema(
+  spec: OpenApiDocument,
+  schema: import('../../api/openapi').OpenApiSchema,
+): unknown {
   if (schema.$ref) {
     const resolved = resolveRef<import('../../api/openapi').OpenApiSchema>(spec, schema);
     return resolved ? sampleFromSchema(spec, resolved) : {};

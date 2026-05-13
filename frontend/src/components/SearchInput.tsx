@@ -27,7 +27,9 @@ export function SearchInput({
     <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-dim">
       <span>Search</span>
       <div className="flex items-center gap-2 rounded-[3px] border border-line-strong bg-bg-elev px-2.5 py-1.5">
-        <span aria-hidden="true" className="text-text-dim">⌕</span>
+        <span aria-hidden="true" className="text-text-dim">
+          ⌕
+        </span>
         <input
           type="text"
           value={local}

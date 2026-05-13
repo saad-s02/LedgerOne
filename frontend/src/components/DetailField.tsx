@@ -11,9 +11,7 @@ interface Props {
 export function DetailField({ label, children, index = 0 }: Props) {
   const reduced = useReducedMotion();
   const initial = reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 };
-  const transition = reduced
-    ? { duration: 0 }
-    : { duration: 0.2, delay: 0.05 + index * 0.025 };
+  const transition = reduced ? { duration: 0 } : { duration: 0.2, delay: 0.05 + index * 0.025 };
 
   return (
     <motion.div

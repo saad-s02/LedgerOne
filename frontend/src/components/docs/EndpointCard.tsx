@@ -30,7 +30,10 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
   const bodySchema = operation.requestBody?.content?.['application/json']?.schema;
 
   return (
-    <article id={`op-${opId}`} className="overflow-hidden rounded-xl border border-line bg-bg-elev shadow-sm">
+    <article
+      id={`op-${opId}`}
+      className="overflow-hidden rounded-xl border border-line bg-bg-elev shadow-sm"
+    >
       <header className="border-b border-line bg-bg-elev px-5 py-4">
         <div className="flex flex-wrap items-center gap-3">
           <MethodBadge method={method} />
@@ -44,12 +47,12 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
 
       <div className="space-y-5 px-5 py-5">
         {operation.description && (
-          <p className="whitespace-pre-line text-sm leading-relaxed text-text">{operation.description}</p>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-text">
+            {operation.description}
+          </p>
         )}
 
-        {note && (
-          <DesignNoteCallout summary={note.summary} references={note.references} />
-        )}
+        {note && <DesignNoteCallout summary={note.summary} references={note.references} />}
 
         {operation.parameters && operation.parameters.length > 0 && (
           <Section title="Parameters">
@@ -70,7 +73,9 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
                       <td className="px-3 py-2 font-mono text-xs text-text-bright">{p.name}</td>
                       <td className="px-3 py-2 font-mono text-xs text-text-dim">{p.in}</td>
                       <td className="px-3 py-2 font-mono text-xs text-text">
-                        {p.schema?.enum ? p.schema.enum.join(' | ') : (p.schema?.format ?? p.schema?.type ?? 'string')}
+                        {p.schema?.enum
+                          ? p.schema.enum.join(' | ')
+                          : (p.schema?.format ?? p.schema?.type ?? 'string')}
                       </td>
                       <td className="px-3 py-2 text-xs text-text">{p.required ? 'yes' : ''}</td>
                       <td className="px-3 py-2 text-xs text-text-dim">{p.description ?? ''}</td>
@@ -97,7 +102,9 @@ export function EndpointCard({ method, path, operation, spec }: Props) {
                   <div key={code} className="rounded border border-line">
                     <div className="flex items-center gap-2 border-b border-line bg-bg-elev px-3 py-1.5">
                       <StatusBadge code={code} />
-                      {resp.description && <span className="text-xs text-text">{resp.description}</span>}
+                      {resp.description && (
+                        <span className="text-xs text-text">{resp.description}</span>
+                      )}
                     </div>
                     {respSchema ? (
                       <div className="p-3">
