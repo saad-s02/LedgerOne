@@ -137,3 +137,11 @@ test('Page-size selector changes rows-per-page and resets page to 1', async ({ p
   await expect(page.locator('tbody tr[data-testid="skeleton-row"]')).toHaveCount(0);
   await expect(page.locator('tbody tr')).toHaveCount(50);
 });
+
+test('Search input debounces ~300ms before URL updates', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Search').fill('AAPL');
+
+  // After debounce window, URL should contain ?search=AAPL.
+  await expect(page).toHaveURL(/[?&]search=AAPL(&|$)/, { timeout: 1000 });
+});

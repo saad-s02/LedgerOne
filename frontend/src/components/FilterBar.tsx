@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { ALLOWED_PAGE_SIZES } from '../lib/listSearch';
 import type { ListSearch } from '../lib/listSearch';
 import type { TransactionType, TransactionStatus } from '../api/transactions';
+import { useDebouncedValue } from '../lib/useDebouncedValue';
 
 interface Props {
   value: ListSearch;
@@ -11,6 +13,17 @@ const TYPES: readonly TransactionType[] = ['Buy', 'Sell', 'Fee', 'Transfer', 'Di
 const STATUSES: readonly TransactionStatus[] = ['Pending', 'Settled', 'Cancelled'];
 
 export function FilterBar({ value, onChange }: Props) {
+  const [searchInput, setSearchInput] = useState(value.search ?? '');
+  const debouncedSearch = useDebouncedValue(searchInput, 300);
+
+  useEffect(() => {
+    const trimmed = debouncedSearch.trim();
+    const current = value.search ?? '';
+    if (trimmed === current) return;
+    onChange({ search: trimmed.length > 0 ? trimmed : undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   return (
     <div className="mb-4 flex flex-wrap items-end gap-3 rounded border border-gray-200 bg-white p-3">
       <label className="flex flex-col text-xs text-gray-600">
@@ -97,6 +110,16 @@ export function FilterBar({ value, onChange }: Props) {
             </option>
           ))}
         </select>
+      </label>
+      <label className="flex flex-col text-xs text-gray-600">
+        <span>Search</span>
+        <input
+          type="text"
+          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          placeholder="account or symbol"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
       </label>
     </div>
   );
