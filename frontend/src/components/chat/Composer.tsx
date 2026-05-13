@@ -25,12 +25,12 @@ export function Composer({
 
   return (
     <div
-      className="flex items-end gap-2 border-t border-slate-200 bg-white p-3"
+      className="flex items-end gap-2 border-t border-line bg-bg-elev p-3"
       data-testid="composer"
     >
       <textarea
         aria-label="Chat message"
-        className="min-h-[60px] flex-1 resize-none rounded border border-slate-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+        className="min-h-[60px] flex-1 resize-none rounded-[3px] border border-line-strong bg-bg px-2 py-1.5 font-mono text-[12px] text-text-bright placeholder:text-text-dim/60 focus:border-cyan/60 focus:outline-none"
         placeholder="Ask about transactions… (Cmd/Ctrl+Enter to send)"
         value={value}
         maxLength={2000}
@@ -40,7 +40,7 @@ export function Composer({
       />
       <button
         type="button"
-        className="rounded bg-blue-600 px-3 py-2 text-sm text-white disabled:bg-slate-300"
+        className="rounded-[3px] border border-cyan/40 bg-cyan/[0.08] px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-cyan transition-colors duration-[120ms] hover:bg-cyan/[0.15] disabled:cursor-not-allowed disabled:opacity-50"
         disabled={disabled || value.trim().length === 0}
         onClick={submit}
       >
