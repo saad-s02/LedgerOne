@@ -1,5 +1,6 @@
 using LedgerOne.Api.Controllers;
 using LedgerOne.Api.Data;
+using LedgerOne.Api.Data.Seeding;
 using LedgerOne.Api.Infrastructure.Logging;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -39,7 +40,11 @@ app.UseExceptionHandler();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
+    if (app.Environment.IsDevelopment() && !await db.Transactions.AnyAsync())
+    {
+        await DevSeeder.SeedAsync(db, CancellationToken.None);
+    }
 }
 
 // Gate test endpoints: return 404 for /api/test/* in any env except Testing.
