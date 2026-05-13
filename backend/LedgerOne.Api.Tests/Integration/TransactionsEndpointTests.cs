@@ -48,6 +48,42 @@ public class TransactionsEndpointTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task Get_TransactionById_ExistingId_Returns200WithDetail()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        var list = await client.GetFromJsonAsync<ListTransactionsResponse>(
+            "/api/transactions?page=1&pageSize=1", JsonOptions, ct);
+        list.Should().NotBeNull();
+        var existingId = list!.Data.Single().Id;
+
+        var response = await client.GetAsync($"/api/transactions/{existingId}", ct);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var dto = await response.Content.ReadFromJsonAsync<TransactionDetailDto>(JsonOptions, ct);
+        dto.Should().NotBeNull();
+        dto!.Id.Should().Be(existingId);
+        dto.CreatedAt.Should().NotBe(default);
+    }
+
+    [Fact]
+    public async Task Get_TransactionById_MissingId_Returns404ProblemDetails()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var client = _factory.CreateClient();
+        await client.PostAsync("/api/test/seed", null, ct);
+
+        var response = await client.GetAsync("/api/transactions/999999", ct);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var body = await response.Content.ReadAsStringAsync(ct);
+        body.Should().Contain("traceId");
+        body.Should().Contain("Resource not found");
+    }
+
+    [Fact]
     public async Task Get_Transactions_SearchByAccountId_ReturnsMatchingRows()
     {
         var ct = TestContext.Current.CancellationToken;

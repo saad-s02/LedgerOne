@@ -40,6 +40,7 @@ if (allowedOrigins.Length > 0)
 }
 
 builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.ListTransactionsHandler>();
+builder.Services.AddScoped<LedgerOne.Api.Features.Transactions.GetTransactionHandler>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddDbContext<AppDbContext>(opts =>
