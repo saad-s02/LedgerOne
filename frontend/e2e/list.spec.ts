@@ -8,7 +8,7 @@ test.beforeEach(async () => {
 
 test('list page loads and shows table with rows', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'LedgerOne' })).toBeVisible();
+  await expect(page.getByRole('banner')).toContainText('LEDGER//ONE');
   const table = page.getByRole('table');
   await expect(table).toBeVisible();
   await expect(table.locator('thead th')).toHaveCount(7);
