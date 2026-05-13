@@ -6,7 +6,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === 'user') {
     return (
       <div className="flex justify-end" data-testid="message-user">
-        <div className="max-w-[85%] rounded-lg bg-blue-600 px-3 py-2 text-sm text-white">
+        <div className="max-w-[85%] rounded-lg border border-cyan/40 bg-cyan/[0.08] px-3 py-2 font-mono text-[12px] text-text-bright">
           {message.text}
         </div>
       </div>
@@ -15,8 +15,8 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
   const isError = message.isErrorBubble === true;
   const bubbleClass = isError
-    ? 'border border-red-300 bg-red-50 text-red-800'
-    : 'bg-slate-100 text-slate-900';
+    ? 'border-rose-500/40 bg-rose-500/[0.05] text-rose-300'
+    : 'border-line bg-bg-elev text-text';
 
   return (
     <div
@@ -28,7 +28,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
         <ToolCallCard key={`${message.id}-tc-${i}`} toolCall={tc} />
       ))}
       {message.text && (
-        <div className={`max-w-[95%] rounded-lg px-3 py-2 text-sm ${bubbleClass}`}>
+        <div className={`max-w-[95%] rounded-lg border px-3 py-2 text-[13px] ${bubbleClass}`}>
           <MarkdownText>{message.text}</MarkdownText>
         </div>
       )}
