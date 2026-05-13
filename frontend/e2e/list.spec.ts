@@ -51,14 +51,15 @@ test('Next button is disabled on last page', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
 });
 
-test('shows loading state before rows appear', async ({ page }) => {
+test('shows skeleton rows before data arrives', async ({ page }) => {
   await page.route('http://localhost:5000/api/transactions*', async (route) => {
     await new Promise((r) => setTimeout(r, 500));
     await route.continue();
   });
   const navigation = page.goto('/');
-  await expect(page.getByText('Loading…')).toBeVisible();
+  await expect(page.locator('tbody tr[data-testid="skeleton-row"]')).toHaveCount(8);
   await navigation;
+  await expect(page.locator('tbody tr[data-testid="skeleton-row"]')).toHaveCount(0);
   await expect(page.locator('tbody tr').first()).toBeVisible();
 });
 
@@ -87,7 +88,7 @@ test('shows empty-state message when no transactions', async ({ page }) => {
   await clearFixture();
   await page.goto('/');
   await expect(page.getByText('No transactions')).toBeVisible();
-  await expect(page.locator('table')).not.toBeVisible();
+  await expect(page.locator('tbody tr')).toHaveCount(0);
 });
 
 test('status pill renders with semantic color class', async ({ page }) => {
