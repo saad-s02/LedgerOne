@@ -89,3 +89,11 @@ test('shows empty-state message when no transactions', async ({ page }) => {
   await expect(page.getByText('No transactions')).toBeVisible();
   await expect(page.locator('table')).not.toBeVisible();
 });
+
+test('status pill renders with semantic color class', async ({ page }) => {
+  await page.goto('/');
+  const firstStatusCell = page.locator('tbody tr').first().locator('td').last();
+  const pill = firstStatusCell.locator('span');
+  await expect(pill).toBeVisible();
+  await expect(pill).toHaveClass(/bg-(green|yellow|red)-100/);
+});

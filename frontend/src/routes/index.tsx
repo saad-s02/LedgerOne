@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTransactions, transactionsKey } from '../api/transactions';
 import { listSearchSchema } from '../lib/listSearch';
+import { StatusPill } from '../components/StatusPill';
 
 export const Route = createFileRoute('/')({
   validateSearch: listSearchSchema.parse,
@@ -55,7 +56,9 @@ function ListPage() {
               <td className="px-3 py-2">
                 {t.amount.toFixed(2)} {t.currency}
               </td>
-              <td className="px-3 py-2">{t.status}</td>
+              <td className="px-3 py-2">
+                <StatusPill status={t.status} />
+              </td>
             </tr>
           ))}
         </tbody>
