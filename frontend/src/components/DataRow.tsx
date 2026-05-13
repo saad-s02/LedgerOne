@@ -20,17 +20,12 @@ export function DataRow({ onActivate, children }: Props) {
       onClick={onActivate}
       onKeyDown={handleKey}
       className={[
-        'group cursor-pointer border-b border-line',
+        'cursor-pointer border-b border-line border-l-2 border-l-transparent',
         'transition-colors duration-150',
-        'hover:bg-cyan/[0.04]',
-        'focus:bg-cyan/[0.04] focus:outline-none',
-        'relative',
+        'hover:border-l-cyan hover:bg-cyan/[0.04]',
+        'focus:border-l-cyan focus:bg-cyan/[0.04] focus:outline-none',
       ].join(' ')}
     >
-      <td
-        aria-hidden="true"
-        className="absolute inset-y-0 left-0 w-[2px] bg-cyan opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus:opacity-100"
-      />
       {children}
     </tr>
   );
