@@ -31,3 +31,15 @@ test('Prev button returns to page 1', async ({ page }) => {
   await expect(page).toHaveURL(/^[^?]*\/?$|[?&]page=1(&|$)/);
   await expect(page.getByText(/Page 1 of \d+/)).toBeVisible();
 });
+
+test('Prev button is disabled on page 1', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Prev' })).toBeDisabled();
+});
+
+test('Next button is disabled on last page', async ({ page }) => {
+  // 60 fixture rows / 25 page size = 3 pages
+  await page.goto('/?page=3');
+  await expect(page.getByText('Page 3 of 3')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
+});
